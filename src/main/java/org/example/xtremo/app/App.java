@@ -1,4 +1,4 @@
-package org.example.xtremo;
+package org.example.xtremo.app;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;

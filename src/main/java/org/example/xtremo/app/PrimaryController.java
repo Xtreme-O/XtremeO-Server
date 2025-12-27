@@ -1,4 +1,4 @@
-package org.example.xtremo;
+package org.example.xtremo.app;
 
 import java.io.IOException;
 import javafx.fxml.FXML;
