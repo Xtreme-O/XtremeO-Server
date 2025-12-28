@@ -21,25 +21,37 @@ public class PlayerDaoImpl implements PlayerDao {
     }
 
     @Override
-    public Player save(Player player) {
-        String query = "INSERT INTO users (username, password_hash, avatar_url, status) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
-            statement.setString(1, player.getUsername());
-            statement.setString(2, player.getPasswordHash());
-            statement.setString(3, player.getAvatarUrl());
-            statement.setString(4, player.getStatus());
-            int rowsAffected = statement.executeUpdate();
-            if (rowsAffected > 0) {
-                ResultSet resultSet = statement.getGeneratedKeys();
-                if (resultSet.next()) {
-                    return mapToPlayer(resultSet);
-                }
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Error saving player", e);
+public Player save(Player player) {
+    String query = "INSERT INTO users (username, password_hash, avatar_url, status) VALUES (?, ?, ?, ?)";
+
+    try (PreparedStatement statement =
+             connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+
+        statement.setString(1, player.getUsername());
+        statement.setString(2, player.getPasswordHash());
+        statement.setString(3, player.getAvatarUrl());
+        statement.setString(4, player.getStatus());
+
+        int rowsAffected = statement.executeUpdate();
+
+        if (rowsAffected == 0) {
+            throw new SQLException("Creating user failed, no rows affected.");
         }
-        return null;
+
+        try (ResultSet keys = statement.getGeneratedKeys()) {
+            if (keys.next()) {
+                int generatedId = keys.getInt(1);
+                return findById(generatedId)
+                        .orElseThrow(() -> new SQLException("User not found after insert"));
+            }
+        }
+    } catch (SQLException e) {
+        throw new RuntimeException("Error saving player", e);
     }
+
+    return null;
+}
+
 
     @Override
     public Optional<Player> findById(int playerId) {
