@@ -1,13 +1,21 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package org.example.xtremo.dao;
 
-/**
- *
- * @author hosam
- */
-public class PlayerDao {
-    
+import org.example.xtremo.model.entity.Player;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface PlayerDao {
+
+    Player save(Player player);
+
+    Optional<Player> findById(int playerId);
+
+    Optional<Player> findByUsername(String username);
+
+    List<Player> findAll();
+
+    boolean update(Player player);
+
+    boolean deleteById(int playerId);
 }
