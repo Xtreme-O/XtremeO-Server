@@ -41,4 +41,25 @@ public class AuthService {
         
         
     }
+    
+    public PlayerDto register(String username, String password, String avatarUrl) {
+
+    if (playerDao.findByUsername(username).isPresent()) {
+        throw new RuntimeException("Username already exists");
+    }
+
+    String passwordHash = PasswordUtils.hashPassword(password);
+
+    Player player = new Player(
+            username,
+            passwordHash,
+            avatarUrl,
+            "OFFLINE"
+    );
+
+    Player savedPlayer = playerDao.save(player);
+
+    return PlayerMapper.toDto(savedPlayer);
+}
+
 }
