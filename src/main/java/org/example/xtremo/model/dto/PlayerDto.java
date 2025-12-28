@@ -1,13 +1,13 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package org.example.xtremo.model.dto;
 
-/**
- *
- * @author hosam
- */
-public class PlayerDto {
-    
+import java.time.LocalDateTime;
+
+public record PlayerDto(
+    int id,
+    String username,
+    String avatarUrl,
+    String status,
+    LocalDateTime createdAt,
+    LocalDateTime lastLogin
+) {
 }
