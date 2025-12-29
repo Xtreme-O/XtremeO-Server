@@ -1,16 +1,283 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Button?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.XYChart?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid?>
+<?import org.controlsfx.control.ToggleSwitch?>
 
-<VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.xtremo.controller.PrimaryController">
-   <children>
-      <Label text="Primary View" />
-      <Button fx:id="primaryButton" text="Switch to Secondary View" onAction="#switchToSecondary"/>
-   </children>
-   <padding>
-      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-   </padding>
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="org.example.xtremo.controller.PrimaryController" 
+      styleClass="root-container" spacing="0">
+    
+    <!-- Header -->
+    <HBox styleClass="header" alignment="CENTER_LEFT" spacing="15">
+        <padding>
+            <Insets top="12" right="24" bottom="12" left="24"/>
+        </padding>
+        
+        <!-- Logo and Brand -->
+        <HBox spacing="12" alignment="CENTER_LEFT">
+            <StackPane styleClass="logo-icon">
+                <FontIcon iconLiteral="fas-cube" iconSize="20" styleClass="logo-icon-fa" fx:id="logoIcon"/>
+            </StackPane>
+            
+            <VBox spacing="2">
+                <Text text="Tic-Tac-Toe Ops" styleClass="brand-title"/>
+                <HBox spacing="6" alignment="CENTER_LEFT">
+                    <Circle radius="4" styleClass="status-indicator"/>
+                    <Text text="Systems Operational" styleClass="status-text"/>
+                </HBox>
+            </VBox>
+        </HBox>
+        
+        <!-- Spacer -->
+        <Region HBox.hgrow="ALWAYS"/>
+        
+        <!-- Control Buttons -->
+        <HBox spacing="10">
+            <Button text="Stop" styleClass="btn-danger" fx:id="stopBtn">
+                <graphic>
+                    <FontIcon iconLiteral="fas-stop" iconSize="12" fx:id="stopBtnIcon"/>
+                </graphic>
+            </Button>
+            <Button text="Restart" styleClass="btn-restart" fx:id="restartBtn">
+                <graphic>
+                    <FontIcon iconLiteral="fas-redo" iconSize="12" fx:id="restartBtnIcon"/>
+                </graphic>
+            </Button>
+        </HBox>
+    </HBox>
+    
+    <!-- Main Content -->
+    <ScrollPane fitToWidth="true" styleClass="content-scroll" VBox.vgrow="ALWAYS">
+        <VBox spacing="24" styleClass="main-content">
+            <padding>
+                <Insets top="24" right="24" bottom="24" left="24"/>
+            </padding>
+            
+            <!-- Welcome Section -->
+            <VBox spacing="4" alignment="CENTER_LEFT">
+                <Text text="Welcome back, Admin!" styleClass="welcome-title"/>
+                <Text text="Here's what's happening in the arena today." styleClass="welcome-subtitle"/>
+            </VBox>
+            
+            <!-- Stats Grid -->
+            <GridPane hgap="16" vgap="16" styleClass="stats-grid">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="50" />
+                    <ColumnConstraints percentWidth="50" />
+                </columnConstraints>
+                
+                <!-- Card 1: Active Players -->
+                <VBox styleClass="stat-card, stat-card-glow" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                    <padding>
+                        <Insets top="20" right="20" bottom="20" left="20"/>
+                    </padding>
+                    
+                    <HBox alignment="CENTER_LEFT" spacing="0">
+                        <StackPane styleClass="stat-icon, stat-icon-primary">
+                            <FontIcon iconLiteral="fas-users" iconSize="24" styleClass="icon-fa-large" fx:id="activePlayersIcon"/>
+                        </StackPane>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label text="+12.5% ↑" styleClass="stat-badge, stat-badge-success"/>
+                    </HBox>
+                    
+                    <VBox spacing="6" VBox.vgrow="ALWAYS">
+                        <VBox.margin>
+                            <Insets top="16"/>
+                        </VBox.margin>
+                        <Text text="Active Players" styleClass="stat-label"/>
+                        <HBox spacing="8" alignment="BASELINE_LEFT">
+                            <Text text="1,245" styleClass="stat-value"/>
+                        </HBox>
+                        <ProgressBar progress="0.249" styleClass="stat-progress" maxWidth="Infinity">
+                            <VBox.margin>
+                                <Insets top="8"/>
+                            </VBox.margin>
+                        </ProgressBar>
+                    </VBox>
+                </VBox>
+                
+                <!-- Card 2: Live Matches -->
+                <VBox styleClass="stat-card, stat-card-glow" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                    <padding>
+                        <Insets top="20" right="20" bottom="20" left="20"/>
+                    </padding>
+                    
+                    <HBox alignment="CENTER_LEFT" spacing="0">
+                        <StackPane styleClass="stat-icon, stat-icon-purple">
+                            <FontIcon iconLiteral="fas-gamepad" iconSize="24" styleClass="icon-fa-large" fx:id="liveMatchesIcon"/>
+                        </StackPane>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label text="Peak Hours" styleClass="stat-badge, stat-badge-warning"/>
+                    </HBox>
+                    
+                    <VBox spacing="6" VBox.vgrow="ALWAYS">
+                        <VBox.margin>
+                            <Insets top="16"/>
+                        </VBox.margin>
+                        <Text text="Live Matches" styleClass="stat-label"/>
+                        <HBox spacing="8" alignment="BASELINE_LEFT">
+                            <Text text="84" styleClass="stat-value"/>
+                            <Text text="games active" styleClass="stat-secondary"/>
+                        </HBox>
+                        <HBox spacing="6" alignment="CENTER_LEFT">
+                            <VBox.margin>
+                                <Insets top="8"/>
+                            </VBox.margin>
+                            <Circle radius="3" styleClass="pulse-dot"/>
+                            <Text text="Live" styleClass="live-text"/>
+                        </HBox>
+                    </VBox>
+                </VBox>
+            </GridPane>
+            
+            <!-- Dashboard Grid -->
+            <GridPane hgap="20" vgap="20" styleClass="dashboard-grid">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="65" />
+                    <ColumnConstraints percentWidth="35" />
+                </columnConstraints>
+                
+                <!-- Left Column -->
+                <VBox spacing="20" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                    <!-- Player Activity Chart -->
+                    <VBox styleClass="chart-container, glass-card">
+                        <HBox alignment="CENTER_LEFT" styleClass="chart-header">
+                            <padding>
+                                <Insets top="16" right="20" bottom="16" left="20"/>
+                            </padding>
+                            <VBox spacing="4">
+                                <Text text="Player Concurrency" styleClass="chart-title"/>
+                                <Text text="Last 24 Hours" styleClass="chart-subtitle"/>
+                            </VBox>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <StackPane styleClass="chart-badge">
+                                <HBox spacing="6" alignment="CENTER">
+                                    <FontIcon iconLiteral="fas-fire" iconSize="12" styleClass="chart-badge-icon"/>
+                                    <Text text="Peak: 1.2K" styleClass="chart-badge-text"/>
+                                </HBox>
+                            </StackPane>
+                        </HBox>
+                        
+                        <VBox styleClass="chart-body">
+                            <padding>
+                                <Insets top="20" right="20" bottom="20" left="20"/>
+                            </padding>
+                            
+                            <!-- Timeline Chart -->
+                            <LineChart fx:id="playerChart" styleClass="player-line-chart" prefHeight="200">
+                                <xAxis>
+                                    <NumberAxis side="BOTTOM" label="Time (Hours)" lowerBound="0" upperBound="24" tickUnit="6" styleClass="chart-axis"/>
+                                </xAxis>
+                                <yAxis>
+                                    <NumberAxis side="LEFT" label="Players" lowerBound="0" upperBound="1500" tickUnit="300" styleClass="chart-axis"/>
+                                </yAxis>
+                            </LineChart>
+                        </VBox>
+                    </VBox>
+                    
+                    <!-- Server Logs -->
+                    <VBox styleClass="terminal-container, glass-card">
+                        <HBox alignment="CENTER_LEFT" styleClass="terminal-header">
+                            <padding>
+                                <Insets top="16" right="20" bottom="16" left="20"/>
+                            </padding>
+                            <FontIcon iconLiteral="fas-terminal" iconSize="14" styleClass="terminal-icon-fa"/>
+                            <Text text="server_logs.txt" styleClass="terminal-title"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <HBox spacing="8">
+                                <Circle radius="6" styleClass="terminal-dot, terminal-dot-red"/>
+                                <Circle radius="6" styleClass="terminal-dot, terminal-dot-yellow"/>
+                                <Circle radius="6" styleClass="terminal-dot, terminal-dot-green"/>
+                            </HBox>
+                        </HBox>
+                        
+                        <ScrollPane fx:id="terminalScroll" styleClass="terminal-scroll" prefHeight="220" fitToWidth="true">
+                            <VBox fx:id="logContainer" spacing="10" styleClass="terminal-logs">
+                                <padding>
+                                    <Insets top="20" right="20" bottom="20" left="20"/>
+                                </padding>
+                            </VBox>
+                        </ScrollPane>
+                    </VBox>
+                </VBox>
+                
+                <!-- Right Column -->
+                <VBox GridPane.columnIndex="1" GridPane.rowIndex="0">
+                    <!-- Service Controls -->
+                    <VBox styleClass="control-panel, glass-card">
+                        <padding>
+                            <Insets top="20" right="20" left="20"/>
+                        </padding>
+                        
+                        <VBox spacing="6">
+                            <Text text="Service Controls" styleClass="panel-title"/>
+                            <Text text="Manage server services" styleClass="panel-subtitle"/>
+                        </VBox>
+                        
+                        <VBox styleClass="toggle-list">
+                            <VBox.margin>
+                                <Insets top="20"/>
+                            </VBox.margin>
+                            
+                            <!-- Toggle 1 -->
+                            <HBox alignment="CENTER_LEFT" spacing="0" styleClass="toggle-row">
+                                <VBox spacing="8" HBox.hgrow="ALWAYS">
+                                    <Text text="Matchmaking" styleClass="toggle-title"/>
+                                    <Text text="Allow new games" styleClass="toggle-subtitle"/>
+                                </VBox>
+                                <ToggleSwitch fx:id="matchmakingToggle" selected="true"/>
+                            </HBox>
+                            
+                            <!-- Toggle 2 -->
+                            <HBox alignment="CENTER_LEFT" spacing="0" styleClass="toggle-row">
+                                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                                    <Text text="Chat Server" styleClass="toggle-title"/>
+                                    <Text text="Global &amp; Match chat" styleClass="toggle-subtitle"/>
+                                </VBox>
+                                <ToggleSwitch fx:id="chatToggle" selected="true"/>
+                            </HBox>
+
+                        </VBox>
+                    </VBox>
+                </VBox>
+            </GridPane>
+            
+            <!-- Recent Matches Table -->
+            <VBox styleClass="table-container, glass-card">
+                <HBox alignment="CENTER_LEFT" styleClass="table-header">
+                    <padding>
+                        <Insets top="16" right="20" bottom="16" left="20"/>
+                    </padding>
+                    <VBox spacing="4">
+                        <Text text="Recent Matches" styleClass="table-title"/>
+                        <Text text="Latest completed games" styleClass="table-subtitle"/>
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="View All" styleClass="link-btn">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-arrow-right" iconSize="12"/>
+                        </graphic>
+                    </Button>
+                </HBox>
+                
+                <TableView fx:id="matchesTable" styleClass="matches-table" prefHeight="220">
+                    <columns>
+                        <TableColumn text="Match ID" reorderable="false" sortable="false"/>
+                        <TableColumn text="Player 1" reorderable="false" sortable="false"/>
+                        <TableColumn text="Player 2" reorderable="false" sortable="false"/>
+                        <TableColumn text="Winner" reorderable="false" sortable="false"/>
+                        <TableColumn text="Duration" reorderable="false" sortable="false"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </VBox>
+    </ScrollPane>
 </VBox>
