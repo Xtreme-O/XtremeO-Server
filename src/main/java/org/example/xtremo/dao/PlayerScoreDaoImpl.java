@@ -31,15 +31,32 @@ public class PlayerScoreDaoImpl implements PlayerScoreDao {
             statement.setInt(6, score.getLongestStreak());
             int rowsAffected = statement.executeUpdate();
             if (rowsAffected > 0) {
-                ResultSet resultSet = statement.getGeneratedKeys();
-                if (resultSet.next()) {
-                    return mapToUserScore(resultSet);
-                }
+               var resultSet = statement.getGeneratedKeys();
+               if(resultSet.next()) {
+                   return findById(resultSet.getInt(1)).orElseThrow();
+               }
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error saving user score", e);
         }
         return null;
+    }
+    
+    
+    @Override
+    public Optional<PlayerScore> findById(int id) {
+        String query = "SELECT * FROM user_scores WHERE score_id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, id);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return Optional.of(mapToUserScore(resultSet));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error finding user score with id : " + id, e);
+        }
+        return Optional.empty();
     }
 
     @Override

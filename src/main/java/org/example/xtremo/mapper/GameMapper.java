@@ -6,6 +6,7 @@ import org.example.xtremo.model.entity.Game;
 public class GameMapper {
 
     private GameMapper() {
+        // Private constructor to prevent instantiation
     }
 
     public static GameDTO toDto(Game game) {
@@ -18,6 +19,7 @@ public class GameMapper {
             game.getPlayer1Id(),
             game.getPlayer2Id(),
             game.getWinnerId(),
+            game.getGameResult(),
             game.getStartedAt(),
             game.getEndedAt(),
             game.isRecorded(),
@@ -29,16 +31,17 @@ public class GameMapper {
         if (gameDTO == null) {
             return null;
         }
-        Game game = new Game();
-        game.setGameId(gameDTO.gameId());
-        game.setGameType(gameDTO.gameType());
-        game.setPlayer1Id(gameDTO.player1Id());
-        game.setPlayer2Id(gameDTO.player2Id());
-        game.setWinnerId(gameDTO.winnerId());
-        game.setStartedAt(gameDTO.startedAt());
-        game.setEndedAt(gameDTO.endedAt());
-        game.setRecorded(gameDTO.isRecorded());
-        game.setRecordFilePath(gameDTO.recordFilePath());
-        return game;
+        return new Game(
+            gameDTO.gameId(),
+            gameDTO.gameType(),
+            gameDTO.player1Id(),
+            gameDTO.player2Id(),
+            gameDTO.winnerId(),
+            gameDTO.gameResult(),
+            gameDTO.startedAt(),
+            gameDTO.endedAt(),
+            gameDTO.isRecorded(),
+            gameDTO.recordFilePath()
+        );
     }
 }

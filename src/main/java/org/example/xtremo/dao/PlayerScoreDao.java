@@ -10,6 +10,8 @@ public interface PlayerScoreDao {
     PlayerScore save(PlayerScore score);
 
     Optional<PlayerScore> findByUserId(int userId);
+    
+    Optional<PlayerScore> findById(int id);
 
     List<PlayerScore> findAll();
 

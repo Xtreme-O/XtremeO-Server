@@ -30,10 +30,10 @@ public class PlayerDaoImpl implements PlayerDao {
             statement.setString(4, player.getStatus());
             int rowsAffected = statement.executeUpdate();
             if (rowsAffected > 0) {
-                ResultSet resultSet = statement.getGeneratedKeys();
-                if (resultSet.next()) {
-                    return mapToPlayer(resultSet);
-                }
+               var resultSet = statement.getGeneratedKeys();
+               if(resultSet.next()) {
+                   return findById(resultSet.getInt(1)).orElseThrow();
+               }
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error saving player", e);

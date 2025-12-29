@@ -1,6 +1,6 @@
 package org.example.xtremo.mapper;
 
-import org.example.xtremo.model.dto.PlayerDto;
+import org.example.xtremo.model.dto.PlayerDTO;
 import org.example.xtremo.model.entity.Player;
 
 public class PlayerMapper {
@@ -8,11 +8,11 @@ public class PlayerMapper {
     private PlayerMapper() {
     }
 
-    public static PlayerDto toDto(Player player) {
+    public static PlayerDTO toDto(Player player) {
         if (player == null) {
             return null;
         }
-        return new PlayerDto(
+        return new PlayerDTO(
             player.getId(),
             player.getUsername(),
             player.getAvatarUrl(),
@@ -22,7 +22,7 @@ public class PlayerMapper {
         );
     }
 
-    public static Player toEntity(PlayerDto playerDto) {
+    public static Player toEntity(PlayerDTO playerDto) {
         if (playerDto == null) {
             return null;
         }
