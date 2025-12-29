@@ -1,21 +1,11 @@
 package utils;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 public class Constants {
-    final static int serverPortNumber = 5555;
-    static InetAddress serverId;
+    public final static int serverPortNumber = 6666;
 //    TODO add the database constanst
 
-    static{
-        try{
-            serverId = InetAddress.getLocalHost();
-        }
-        catch(UnknownHostException e){
-            System.out.println("utils.Constants.methodName()");
-        }
-    }
+    
     
     private Constants(){}
     
