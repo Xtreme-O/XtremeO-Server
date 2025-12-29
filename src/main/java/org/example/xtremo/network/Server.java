@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 public class Server implements Runnable{
     
     ServerSocket server;
-    private volatile boolean running = true;
+    private volatile boolean running = false;
 //    int serverPort = Integer.parseInt(ConfigLoader.getProperty("server_port"));
     public static Vector<PlayerConnectionHandler> players = new Vector<>();
     
@@ -25,7 +25,7 @@ public class Server implements Runnable{
     
     
     public Server(){
-        
+        running = true;
     }
 
     @Override

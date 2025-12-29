@@ -6,8 +6,19 @@ package org.example.xtremo.network.protocol;
 
 /**
  *
- * @author hosam
+ * @author wahid
  */
 public class MessageTypeMapper {
+    private MessageTypeMapper(){}
     
+    public static MessageType getMessageType(String message){
+        
+       return switch (message.toUpperCase()) {
+            case "REQUEST"  -> MessageType.REQUEST;
+            case "RESPONSE" -> MessageType.RESPONSE;
+            case "EVENT"    -> MessageType.EVENT;
+            case "ERROR"    -> MessageType.ERROR;
+            default         -> MessageType.UNKNOWN;
+        };
+    }
 }
