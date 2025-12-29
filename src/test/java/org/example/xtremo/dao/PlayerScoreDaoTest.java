@@ -4,10 +4,10 @@ import org.example.xtremo.database.DBConnection;
 import org.example.xtremo.model.entity.Player;
 import org.example.xtremo.model.entity.PlayerScore;
 import org.example.xtremo.model.enums.GameType;
+import org.example.xtremo.model.enums.PlayerStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -30,7 +30,7 @@ class PlayerScoreDaoTest {
     @Test
     @DisplayName("Should save player score and return entity with generated ID")
     void testSavePlayerScore() throws SQLException {
-        Player player = new Player("testuser_score1_" + System.currentTimeMillis(), "password123", "avatar.png", "online");
+        Player player = new Player("testuser_score1_" + System.currentTimeMillis(), "password123", "avatar.png", PlayerStatus.ONLINE);
         Player savedPlayer = playerDao.save(player);
         
         PlayerScore score = new PlayerScore();
@@ -56,7 +56,7 @@ class PlayerScoreDaoTest {
     @Test
     @DisplayName("Should find player score by ID after saving")
     void testFindById() throws SQLException {
-        Player player = new Player("testuser_score2_" + System.currentTimeMillis(), "password123", "avatar.png", "online");
+        Player player = new Player("testuser_score2_" + System.currentTimeMillis(), "password123", "avatar.png", PlayerStatus.ONLINE);
         Player savedPlayer = playerDao.save(player);
         
         PlayerScore score = new PlayerScore();
@@ -83,7 +83,7 @@ class PlayerScoreDaoTest {
     @DisplayName("Should find player score by user ID")
     void testFindByUserId() throws SQLException {
         String uniqueUsername = "testuser_score3_" + System.currentTimeMillis();
-        Player player = new Player(uniqueUsername, "password123", "avatar.png", "online");
+        Player player = new Player(uniqueUsername, "password123", "avatar.png", PlayerStatus.ONLINE);
         Player savedPlayer = playerDao.save(player);
         
         PlayerScore score = new PlayerScore();
@@ -124,10 +124,10 @@ class PlayerScoreDaoTest {
     @Test
     @DisplayName("Should find all player scores")
     void testFindAll() throws SQLException {
-        Player player1 = new Player("testuser_score4_" + System.currentTimeMillis(), "password123", "avatar.png", "online");
+        Player player1 = new Player("testuser_score4_" + System.currentTimeMillis(), "password123", "avatar.png", PlayerStatus.ONLINE);
         Player savedPlayer1 = playerDao.save(player1);
         
-        Player player2 = new Player("testuser_score5_" + System.currentTimeMillis(), "password123", "avatar.png", "online");
+        Player player2 = new Player("testuser_score5_" + System.currentTimeMillis(), "password123", "avatar.png", PlayerStatus.ONLINE);
         Player savedPlayer2 = playerDao.save(player2);
         
         PlayerScore score1 = new PlayerScore();
@@ -160,7 +160,7 @@ class PlayerScoreDaoTest {
     @Test
     @DisplayName("Should update existing player score successfully")
     void testUpdatePlayerScore() throws SQLException {
-        Player player = new Player("testuser_score6_" + System.currentTimeMillis(), "password123", "avatar.png", "online");
+        Player player = new Player("testuser_score6_" + System.currentTimeMillis(), "password123", "avatar.png", PlayerStatus.ONLINE);
         Player savedPlayer = playerDao.save(player);
         
         PlayerScore score = new PlayerScore();
@@ -211,7 +211,7 @@ class PlayerScoreDaoTest {
     @Test
     @DisplayName("Should delete player score by user ID successfully")
     void testDeleteByUserId() throws SQLException {
-        Player player = new Player("testuser_score7_" + System.currentTimeMillis(), "password123", "avatar.png", "online");
+        Player player = new Player("testuser_score7_" + System.currentTimeMillis(), "password123", "avatar.png", PlayerStatus.ONLINE);
         Player savedPlayer = playerDao.save(player);
         
         PlayerScore score = new PlayerScore();

@@ -2,6 +2,7 @@ package org.example.xtremo.dao;
 
 import org.example.xtremo.database.DBConnection;
 import org.example.xtremo.model.entity.Player;
+import org.example.xtremo.model.enums.PlayerStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,20 +27,20 @@ class PlayerDaoTest {
     @Test
     @DisplayName("Should save player and return entity with generated ID")
     void testSavePlayer() throws SQLException {
-        Player newPlayer = new Player("testuser_" + System.currentTimeMillis(), "password123", "avatar.png", "online");
+        Player newPlayer = new Player("testuser_" + System.currentTimeMillis(), "password123", "avatar.png", PlayerStatus.ONLINE);
         
         Player savedPlayer = playerDao.save(newPlayer);
         
         assertNotNull(savedPlayer, "Saved player should not be null");
         assertTrue(savedPlayer.getId() > 0, "Saved player should have a generated ID");
         assertEquals(newPlayer.getUsername(), savedPlayer.getUsername(), "Username should match");
-        assertEquals("online", savedPlayer.getStatus(), "Status should match");
+        assertEquals(PlayerStatus.ONLINE, savedPlayer.getStatus(), "Status should match");
     }
 
     @Test
     @DisplayName("Should find player by ID after saving")
     void testFindById() throws SQLException {
-        Player newPlayer = new Player("findbyid_" + System.currentTimeMillis(), "pass123", "avatar.png", "offline");
+        Player newPlayer = new Player("findbyid_" + System.currentTimeMillis(), "pass123", "avatar.png", PlayerStatus.OFFLINE);
         Player savedPlayer = playerDao.save(newPlayer);
         
         var retrievedPlayer = playerDao.findById(savedPlayer.getId());
@@ -53,7 +54,7 @@ class PlayerDaoTest {
     @DisplayName("Should find player by username")
     void testFindByUsername() throws SQLException {
         String uniqueUsername = "findbyusername_" + System.currentTimeMillis();
-        Player newPlayer = new Player(uniqueUsername, "pass456", "avatar.png", "online");
+        Player newPlayer = new Player(uniqueUsername, "pass456", "avatar.png", PlayerStatus.ONLINE);
         Player savedPlayer = playerDao.save(newPlayer);
         
         var retrievedPlayer = playerDao.findByUsername(uniqueUsername);
@@ -82,9 +83,9 @@ class PlayerDaoTest {
     @Test
     @DisplayName("Should find all players")
     void testFindAll() throws SQLException {
-        Player player1 = playerDao.save(new Player("findall1_" + System.currentTimeMillis(), "pass1", "avatar1.png", "online"));
-        Player player2 = playerDao.save(new Player("findall2_" + System.currentTimeMillis(), "pass2", "avatar2.png", "offline"));
-        Player player3 = playerDao.save(new Player("findall3_" + System.currentTimeMillis(), "pass3", "avatar3.png", "online"));
+        Player player1 = playerDao.save(new Player("findall1_" + System.currentTimeMillis(), "pass1", "avatar1.png", PlayerStatus.ONLINE));
+        Player player2 = playerDao.save(new Player("findall2_" + System.currentTimeMillis(), "pass2", "avatar2.png", PlayerStatus.OFFLINE));
+        Player player3 = playerDao.save(new Player("findall3_" + System.currentTimeMillis(), "pass3", "avatar3.png", PlayerStatus.ONLINE));
         
         var allPlayers = playerDao.findAll();
         
@@ -99,14 +100,14 @@ class PlayerDaoTest {
     @Test
     @DisplayName("Should update existing player successfully")
     void testUpdatePlayer() throws SQLException {
-        Player newPlayer = new Player("updateuser_" + System.currentTimeMillis(), "oldpass", "oldavatar.png", "offline");
+        Player newPlayer = new Player("updateuser_" + System.currentTimeMillis(), "oldpass", "oldavatar.png", PlayerStatus.OFFLINE);
         Player savedPlayer = playerDao.save(newPlayer);
         
         String updatedUsername = "updateduser_" + System.currentTimeMillis();
         savedPlayer.setUsername(updatedUsername);
         savedPlayer.setPasswordHash("newpass");
         savedPlayer.setAvatarUrl("newavatar.png");
-        savedPlayer.setStatus("online");
+        savedPlayer.setStatus(PlayerStatus.ONLINE);
         
         boolean updateResult = playerDao.update(savedPlayer);
         
@@ -117,13 +118,13 @@ class PlayerDaoTest {
         assertEquals(updatedUsername, updatedPlayer.get().getUsername(), "Username should be updated");
         assertEquals("newpass", updatedPlayer.get().getPasswordHash(), "Password should be updated");
         assertEquals("newavatar.png", updatedPlayer.get().getAvatarUrl(), "Avatar should be updated");
-        assertEquals("online", updatedPlayer.get().getStatus(), "Status should be updated");
+        assertEquals(PlayerStatus.ONLINE, updatedPlayer.get().getStatus(), "Status should be updated");
     }
 
     @Test
     @DisplayName("Should return false when updating non-existent player")
     void testUpdateNonExistentPlayer() throws SQLException {
-        Player nonExistentPlayer = new Player("nonexistent_" + System.currentTimeMillis(), "pass", "avatar.png", "online");
+        Player nonExistentPlayer = new Player("nonexistent_" + System.currentTimeMillis(), "pass", "avatar.png", PlayerStatus.ONLINE);
         nonExistentPlayer.setId(99999);
         
         boolean updateResult = playerDao.update(nonExistentPlayer);
@@ -134,7 +135,7 @@ class PlayerDaoTest {
     @Test
     @DisplayName("Should delete player by ID successfully")
     void testDeleteById() throws SQLException {
-        Player newPlayer = new Player("deleteuser_" + System.currentTimeMillis(), "pass123", "avatar.png", "online");
+        Player newPlayer = new Player("deleteuser_" + System.currentTimeMillis(), "pass123", "avatar.png", PlayerStatus.ONLINE);
         Player savedPlayer = playerDao.save(newPlayer);
         int playerId = savedPlayer.getId();
         
@@ -160,11 +161,11 @@ class PlayerDaoTest {
     void testSaveDuplicateUsername() throws SQLException {
         String duplicateUsername = "duplicateuser_" + System.currentTimeMillis();
         
-        Player firstPlayer = new Player(duplicateUsername, "pass1", "avatar1.png", "online");
+        Player firstPlayer = new Player(duplicateUsername, "pass1", "avatar1.png", PlayerStatus.ONLINE);
         Player savedPlayer = playerDao.save(firstPlayer);
         assertNotNull(savedPlayer, "First player should be saved successfully");
         
-        Player duplicatePlayer = new Player(duplicateUsername, "pass2", "avatar2.png", "offline");
+        Player duplicatePlayer = new Player(duplicateUsername, "pass2", "avatar2.png", PlayerStatus.OFFLINE);
         
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             playerDao.save(duplicatePlayer);

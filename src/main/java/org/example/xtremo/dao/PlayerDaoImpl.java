@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.example.xtremo.model.enums.PlayerStatus;
 
 public class PlayerDaoImpl implements PlayerDao {
 
@@ -27,7 +28,7 @@ public class PlayerDaoImpl implements PlayerDao {
             statement.setString(1, player.getUsername());
             statement.setString(2, player.getPasswordHash());
             statement.setString(3, player.getAvatarUrl());
-            statement.setString(4, player.getStatus());
+            statement.setString(4, player.getStatus().name());
             int rowsAffected = statement.executeUpdate();
             if (rowsAffected > 0) {
                var resultSet = statement.getGeneratedKeys();
@@ -94,7 +95,7 @@ public class PlayerDaoImpl implements PlayerDao {
             statement.setString(1, player.getUsername());
             statement.setString(2, player.getPasswordHash());
             statement.setString(3, player.getAvatarUrl());
-            statement.setString(4, player.getStatus());
+            statement.setString(4, player.getStatus().name());
             statement.setInt(5, player.getId());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -121,7 +122,7 @@ public class PlayerDaoImpl implements PlayerDao {
                 resultSet.getString("username"),
                 resultSet.getString("password_hash"),
                 resultSet.getString("avatar_url"),
-                resultSet.getString("status"),
+                PlayerStatus.fromString(resultSet.getString("status")),
                 createdAtTs != null ? createdAtTs.toLocalDateTime() : null,
                 lastLoginTs != null ? lastLoginTs.toLocalDateTime() : null
         );

@@ -7,6 +7,7 @@ import org.example.xtremo.model.entity.Game;
 import org.example.xtremo.model.entity.GameMove;
 import org.example.xtremo.model.entity.Player;
 import org.example.xtremo.model.enums.GameResult;
+import org.example.xtremo.model.enums.PlayerStatus;
 import org.example.xtremo.model.enums.GameType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -39,7 +40,7 @@ class GameMoveDaoTest {
     @Test
     @DisplayName("Should save game move and return entity with generated ID")
     void testSaveGameMove() throws SQLException {
-        Player player = new Player("playermove1_" + System.currentTimeMillis(), "pass", "avatar.png", "online");
+        Player player = new Player("playermove1_" + System.currentTimeMillis(), "pass", "avatar.png", PlayerStatus.ONLINE);
         Player savedPlayer = playerDao.save(player);
         
         Game game = new Game();
@@ -72,7 +73,7 @@ class GameMoveDaoTest {
     @Test
     @DisplayName("Should find game move by ID after saving")
     void testFindById() throws SQLException {
-        Player player = new Player("playermove2_" + System.currentTimeMillis(), "pass", "avatar.png", "online");
+        Player player = new Player("playermove2_" + System.currentTimeMillis(), "pass", "avatar.png", PlayerStatus.ONLINE);
         Player savedPlayer = playerDao.save(player);
         
         Game game = new Game();
@@ -107,8 +108,8 @@ class GameMoveDaoTest {
     @Test
     @DisplayName("Should find moves by game ID")
     void testFindByGameId() throws SQLException {
-        Player player1 = new Player("playermove3a_" + System.currentTimeMillis(), "pass", "avatar.png", "online");
-        Player player2 = new Player("playermove3b_" + System.currentTimeMillis(), "pass", "avatar.png", "online");
+        Player player1 = new Player("playermove3a_" + System.currentTimeMillis(), "pass", "avatar.png", PlayerStatus.ONLINE);
+        Player player2 = new Player("playermove3b_" + System.currentTimeMillis(), "pass", "avatar.png", PlayerStatus.ONLINE);
         Player savedPlayer1 = playerDao.save(player1);
         Player savedPlayer2 = playerDao.save(player2);
         
@@ -163,8 +164,8 @@ class GameMoveDaoTest {
     @Test
     @DisplayName("Should find all game moves")
     void testFindAll() throws SQLException {
-        Player player1 = new Player("playermove4a_" + System.currentTimeMillis(), "pass", "avatar.png", "online");
-        Player player2 = new Player("playermove4b_" + System.currentTimeMillis(), "pass", "avatar.png", "online");
+        Player player1 = new Player("playermove4a_" + System.currentTimeMillis(), "pass", "avatar.png", PlayerStatus.ONLINE);
+        Player player2 = new Player("playermove4b_" + System.currentTimeMillis(), "pass", "avatar.png", PlayerStatus.ONLINE);
         Player savedPlayer1 = playerDao.save(player1);
         Player savedPlayer2 = playerDao.save(player2);
         
@@ -203,7 +204,7 @@ class GameMoveDaoTest {
     @Test
     @DisplayName("Should delete game move by ID successfully")
     void testDeleteById() throws SQLException {
-        Player player = new Player("playermove5_" + System.currentTimeMillis(), "pass", "avatar.png", "online");
+        Player player = new Player("playermove5_" + System.currentTimeMillis(), "pass", "avatar.png", PlayerStatus.ONLINE);
         Player savedPlayer = playerDao.save(player);
         
         Game game = new Game();
@@ -243,8 +244,8 @@ class GameMoveDaoTest {
     @Test
     @DisplayName("Should delete all moves by game ID successfully")
     void testDeleteByGameId() throws SQLException {
-        Player player1 = new Player("playermove6a_" + System.currentTimeMillis(), "pass", "avatar.png", "online");
-        Player player2 = new Player("playermove6b_" + System.currentTimeMillis(), "pass", "avatar.png", "online");
+        Player player1 = new Player("playermove6a_" + System.currentTimeMillis(), "pass", "avatar.png", PlayerStatus.ONLINE);
+        Player player2 = new Player("playermove6b_" + System.currentTimeMillis(), "pass", "avatar.png", PlayerStatus.ONLINE);
         Player savedPlayer1 = playerDao.save(player1);
         Player savedPlayer2 = playerDao.save(player2);
         
