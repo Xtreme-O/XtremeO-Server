@@ -1,4 +1,4 @@
-package utils;
+package org.example.xtremo.utils;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

@@ -29,10 +29,10 @@ public class GameMoveDaoImpl implements GameMoveDao {
             statement.setString(4, move.getMoveData());
             int rowsAffected = statement.executeUpdate();
             if (rowsAffected > 0) {
-                ResultSet resultSet = statement.getGeneratedKeys();
-                if (resultSet.next()) {
-                    return mapToGameMove(resultSet);
-                }
+               var resultSet = statement.getGeneratedKeys();
+               if(resultSet.next()) {
+                   return findById(resultSet.getInt(1)).orElseThrow();
+               }
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error saving game move", e);
