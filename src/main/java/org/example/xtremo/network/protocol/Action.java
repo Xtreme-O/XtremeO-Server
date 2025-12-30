@@ -9,6 +9,8 @@ package org.example.xtremo.network.protocol;
  * @author Elsobky
  */
 public enum Action {
+    LOGIN,
+    REGISTER,
     START,
     WAITING,
     TURN,
