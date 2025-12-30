@@ -150,9 +150,6 @@
     -fx-transition: all 0.3s ease;
 }
 
-.stat-card-glow {
-    -fx-effect: dropshadow(gaussian, rgba(244, 175, 37, 0.25), 35, 0, 0, 12);
-}
 
 .stat-card:hover {
     -fx-border-color: rgba(244, 175, 37, 0.6);
