@@ -6,7 +6,6 @@ package org.example.xtremo.utils;
  * @author Abdelrahman
  */
 public enum LogStyle {
-    TIMESTAMP("log-timestamp"),
     INFO("log-info"),
     WARN("log-warn"),
     SUCCESS("log-success"),

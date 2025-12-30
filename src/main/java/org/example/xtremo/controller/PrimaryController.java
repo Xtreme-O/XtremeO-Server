@@ -18,6 +18,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableView;
 import org.controlsfx.control.ToggleSwitch;
 import javafx.scene.layout.VBox;
+import org.example.xtremo.logging.LoggerManager;
 import org.example.xtremo.model.dto.GameDTO;
 import org.example.xtremo.ui.ActionHandler;
 import org.example.xtremo.ui.ButtonStyleManager;
@@ -73,7 +74,6 @@ public class PrimaryController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         actionHandler = new ActionHandler();
         setupActionHandlers();
-
         Platform.runLater(() -> {
             Parent root = getScene();
             if (root != null) {
@@ -84,6 +84,7 @@ public class PrimaryController implements Initializable {
                         logContainer,
                         terminalScroll);
                 uiInitializer.initialize();
+                LoggerManager.getInstance().init(logContainer, terminalScroll);
             }
         });
     }
