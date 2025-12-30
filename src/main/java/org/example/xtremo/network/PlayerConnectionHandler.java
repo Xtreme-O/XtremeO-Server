@@ -11,6 +11,10 @@ import java.net.SocketException;
 import java.sql.SQLException;
 import org.example.xtremo.dao.PlayerDaoImpl;
 import org.example.xtremo.database.DBConnection;
+import org.example.xtremo.handlers.AuthenticationHandler;
+import org.example.xtremo.handlers.AuthenticationPlayerParser;
+import org.example.xtremo.handlers.model.LoginCredintials;
+import org.example.xtremo.handlers.model.RegisterCredintials;
 import org.example.xtremo.model.dto.PlayerDTO;
 import org.example.xtremo.network.protocol.Action;
 import org.example.xtremo.network.protocol.ActionTypeMapper;
@@ -57,22 +61,16 @@ public class PlayerConnectionHandler implements Runnable {
                 
                 
                 JsonObject header = obj.get("header").getAsJsonObject();
-                JsonObject data = obj.get("data").getAsJsonObject();
-                
-                
+//                JsonObject data = obj.get("data").getAsJsonObject();
                 String action = header.get("action").getAsString();
                 String type = header.get("type").getAsString();
                 
                 
                 System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.INFO, message);
-                
-                System.out.println(data.get("username").getAsString());
-                System.out.println(data.get("password").getAsString());
-                
-                
+                        
                 Action actionType = ActionTypeMapper.getActionType(action);
                 MessageType messageType = MessageTypeMapper.getMessageType(type);
-                
+                AuthService authService = new AuthService(new PlayerDaoImpl(DBConnection.getConnection()));
                 
                 switch (messageType) {
                     case ERROR      -> {break;}
@@ -84,47 +82,31 @@ public class PlayerConnectionHandler implements Runnable {
                         switch (actionType) {
                             case REGISTER -> {
                                 System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.INFO, "In REGISTER cluse");
-                                    AuthService authService;
                                     try {
-                                        authService = new AuthService(new PlayerDaoImpl(DBConnection.getConnection()));
-                                        String username = data.get("username").getAsString(); 
-                                        String password = data.get("password").getAsString();
-
-                                        System.out.println(username);
-                                        System.out.println(password);
-
-
-                                        System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.INFO, () -> username + password);
-                                        PlayerDTO player = authService.register(username, password,"url");
-                                        
-                                        System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.INFO, "User has registered"+player.username());
+                                        RegisterCredintials credintials = AuthenticationPlayerParser.parseFromJasonToPlayerRegisterCredintials(obj);
+                                        System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.INFO, () -> credintials.userName() +" "+ credintials.password());
+                                        PlayerDTO player = AuthenticationHandler.handleRegister(authService, credintials);
+                                        System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.INFO, "User has registered{0}", player.username());
                                     } catch (SQLException | RuntimeException ex) {
                                         System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+                                    } catch (Exception ex) {
+                                        System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
                                     }
-
                                     break;
                             
                             }
                             case LOGIN -> {
-//                                System.out.println(data.getAsString());
                                 System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.INFO, "In LOGIN cluse");
-                                AuthService authService;
                                 try {
-                                    authService = new AuthService(new PlayerDaoImpl(DBConnection.getConnection()));
-                                    String username = data.get("username").getAsString(); 
-                                    String password = data.get("password").getAsString();
-                                    
-                                    System.out.println(username);
-                                    System.out.println(password);
-                                    
-                                    
-                                    System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.INFO, () -> username + password);
-                                    PlayerDTO player = authService.login(username, password);
+                                    LoginCredintials credintials = AuthenticationPlayerParser.parseFromJasonToPlayerLoginCredintials(obj);
+                                    System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.INFO, () -> credintials.userName() + credintials.password());
+                                    PlayerDTO player = AuthenticationHandler.handleLogin(authService, credintials);
                                     System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.INFO, "User has logged in{0}", player.username());
                                 } catch (SQLException ex) {
                                     System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+                                } catch (Exception ex) {
+                                    System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
                                 }
-                                
                                 break;
                                 
                                 
@@ -167,6 +149,8 @@ public class PlayerConnectionHandler implements Runnable {
 
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (SQLException ex) {
+            System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
     }
 }
