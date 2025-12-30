@@ -39,8 +39,9 @@ public class PlayerDaoImpl implements PlayerDao {
         } catch (SQLException e) {
             throw new RuntimeException("Error saving player", e);
         }
-        return null;
-    }
+
+    return null;
+}
 
     @Override
     public Optional<Player> findById(int playerId) {
