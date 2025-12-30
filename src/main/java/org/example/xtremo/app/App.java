@@ -22,6 +22,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
+        
         server = new Server();
         serverThread = new Thread(server, "Server-Main-Thread");
         
@@ -35,9 +36,17 @@ public class App extends Application {
             }
         });
         
-        scene = new Scene(loadFXML(ROOT_FXML), 640, 480);
+        scene = initializeScene();
+        stage.setTitle(TITLE);
         stage.setScene(scene);
         stage.show();
+    }
+    
+    private Scene initializeScene() throws IOException{
+        scene = new Scene(loadFXML(ROOT_FXML), 1200, 750);
+        scene.getStylesheets().add(getClass().getResource(THEME_CSS).toExternalForm());
+        scene.getStylesheets().add(getClass().getResource(STYLE_CSS).toExternalForm());
+        return scene;
     }
 
     @Override
