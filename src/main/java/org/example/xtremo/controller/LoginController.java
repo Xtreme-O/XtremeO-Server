@@ -1,6 +1,6 @@
 package org.example.xtremo.controller;
 
-import org.example.xtremo.model.dto.PlayerDto;
+import org.example.xtremo.model.dto.PlayerDTO;
 import org.example.xtremo.service.AuthService;
 
 /*
@@ -20,7 +20,7 @@ public class LoginController {
         this.authService = authService;
     }
 
-    public PlayerDto login(String username, String password) {
+    public PlayerDTO login(String username, String password) {
         return authService.login(username, password);
     }
 }

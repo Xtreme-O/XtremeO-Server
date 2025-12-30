@@ -4,7 +4,7 @@
  */
 package org.example.xtremo.controller;
 
-import org.example.xtremo.model.dto.PlayerDto;
+import org.example.xtremo.model.dto.PlayerDTO;
 import org.example.xtremo.service.AuthService;
 
 /**
@@ -19,7 +19,7 @@ public class RegisterController {
         this.authService = authService;
     }
 
-    public PlayerDto register(String username, String password, String avatarUrl) {
+    public PlayerDTO register(String username, String password, String avatarUrl) {
         return authService.register(username, password, avatarUrl);
     }
 }
