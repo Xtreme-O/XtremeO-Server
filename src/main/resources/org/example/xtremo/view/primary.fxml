@@ -75,7 +75,7 @@
                 </columnConstraints>
                 
                 <!-- Card 1: Active Players -->
-                <VBox styleClass="stat-card, stat-card-glow" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                <VBox styleClass="stat-card" GridPane.columnIndex="0" GridPane.rowIndex="0">
                     <padding>
                         <Insets top="20" right="20" bottom="20" left="20"/>
                     </padding>
@@ -105,7 +105,7 @@
                 </VBox>
                 
                 <!-- Card 2: Live Matches -->
-                <VBox styleClass="stat-card, stat-card-glow" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                <VBox styleClass="stat-card" GridPane.columnIndex="1" GridPane.rowIndex="0">
                     <padding>
                         <Insets top="20" right="20" bottom="20" left="20"/>
                     </padding>
