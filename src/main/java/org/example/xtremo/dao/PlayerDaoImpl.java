@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.example.xtremo.model.enums.PlayerStatus;
 
 public class PlayerDaoImpl implements PlayerDao {
 
@@ -21,37 +22,26 @@ public class PlayerDaoImpl implements PlayerDao {
     }
 
     @Override
-public Player save(Player player) {
-    String query = "INSERT INTO users (username, password_hash, avatar_url, status) VALUES (?, ?, ?, ?)";
-
-    try (PreparedStatement statement =
-             connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
-
-        statement.setString(1, player.getUsername());
-        statement.setString(2, player.getPasswordHash());
-        statement.setString(3, player.getAvatarUrl());
-        statement.setString(4, player.getStatus());
-
-        int rowsAffected = statement.executeUpdate();
-
-        if (rowsAffected == 0) {
-            throw new SQLException("Creating user failed, no rows affected.");
-        }
-
-        try (ResultSet keys = statement.getGeneratedKeys()) {
-            if (keys.next()) {
-                int generatedId = keys.getInt(1);
-                return findById(generatedId)
-                        .orElseThrow(() -> new SQLException("User not found after insert"));
+    public Player save(Player player) {
+        String query = "INSERT INTO users (username, password_hash, avatar_url, status) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+            statement.setString(1, player.getUsername());
+            statement.setString(2, player.getPasswordHash());
+            statement.setString(3, player.getAvatarUrl());
+            statement.setString(4, player.getStatus().name());
+            int rowsAffected = statement.executeUpdate();
+            if (rowsAffected > 0) {
+               var resultSet = statement.getGeneratedKeys();
+               if(resultSet.next()) {
+                   return findById(resultSet.getInt(1)).orElseThrow();
+               }
             }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error saving player", e);
         }
-    } catch (SQLException e) {
-        throw new RuntimeException("Error saving player", e);
-    }
 
     return null;
 }
-
 
     @Override
     public Optional<Player> findById(int playerId) {
@@ -106,7 +96,7 @@ public Player save(Player player) {
             statement.setString(1, player.getUsername());
             statement.setString(2, player.getPasswordHash());
             statement.setString(3, player.getAvatarUrl());
-            statement.setString(4, player.getStatus());
+            statement.setString(4, player.getStatus().name());
             statement.setInt(5, player.getId());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -133,7 +123,7 @@ public Player save(Player player) {
                 resultSet.getString("username"),
                 resultSet.getString("password_hash"),
                 resultSet.getString("avatar_url"),
-                resultSet.getString("status"),
+                PlayerStatus.fromString(resultSet.getString("status")),
                 createdAtTs != null ? createdAtTs.toLocalDateTime() : null,
                 lastLoginTs != null ? lastLoginTs.toLocalDateTime() : null
         );

@@ -1,29 +1,37 @@
 package org.example.xtremo.model.entity;
 
 import java.time.LocalDateTime;
+import org.example.xtremo.model.enums.GameResult;
+import org.example.xtremo.model.enums.GameType;
 
 public class Game {
+
     private int gameId;
-    private String gameType;
+    private GameType gameType;
     private int player1Id;
     private Integer player2Id;
     private Integer winnerId;
+    private GameResult gameResult;
     private LocalDateTime startedAt;
     private LocalDateTime endedAt;
     private boolean isRecorded;
+    private String recordFilePath;
 
-    public Game(int gameId, String gameType, int player1Id, Integer player2Id, Integer winnerId, LocalDateTime startedAt, LocalDateTime endedAt, boolean isRecorded, String recordFilePath) {
+    public Game(int gameId, GameType gameType, int player1Id, Integer player2Id,
+            Integer winnerId,
+            GameResult gameResult, LocalDateTime startedAt, LocalDateTime endedAt,
+            boolean isRecorded, String recordFilePath) {
         this.gameId = gameId;
         this.gameType = gameType;
         this.player1Id = player1Id;
         this.player2Id = player2Id;
         this.winnerId = winnerId;
+        this.gameResult = gameResult;
         this.startedAt = startedAt;
         this.endedAt = endedAt;
         this.isRecorded = isRecorded;
         this.recordFilePath = recordFilePath;
     }
-    private String recordFilePath;
 
     public Game() {
     }
@@ -36,11 +44,11 @@ public class Game {
         this.gameId = gameId;
     }
 
-    public String getGameType() {
+    public GameType getGameType() {
         return gameType;
     }
 
-    public void setGameType(String gameType) {
+    public void setGameType(GameType gameType) {
         this.gameType = gameType;
     }
 
@@ -99,4 +107,13 @@ public class Game {
     public void setRecordFilePath(String recordFilePath) {
         this.recordFilePath = recordFilePath;
     }
+
+    public GameResult getGameResult() {
+        return gameResult;
+    }
+
+    public void setGameResult(GameResult gameResult) {
+        this.gameResult = gameResult;
+    }
+
 }

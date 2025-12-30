@@ -1,7 +1,6 @@
 package org.example.xtremo.dao;
 
 import org.example.xtremo.model.entity.Game;
-import utils.JdbcUtils;
 
 import java.sql.Statement;
 import java.sql.PreparedStatement;
@@ -13,6 +12,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.example.xtremo.model.enums.GameResult;
+import org.example.xtremo.model.enums.GameType;
+import org.example.xtremo.utils.JdbcUtils;
 
 public class GameDaoImpl implements GameDao {
 
@@ -24,29 +26,36 @@ public class GameDaoImpl implements GameDao {
 
     @Override
     public Game save(Game game) {
-        try {
-            String query = "INSERT INTO games "
-                    + "(game_type, player1_id, player2_id, winner_id, started_at, ended_at, is_recorded, record_file_path) "
-                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-            PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-            statement.setString(1, game.getGameType());
+        String query = "INSERT INTO games "
+                + "(game_type, player1_id, player2_id, winner_id, game_result, started_at, ended_at, is_recorded, record_file_path) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+
+            statement.setString(1, game.getGameType().name());
             statement.setInt(2, game.getPlayer1Id());
             JdbcUtils.setNullableInt(statement, 3, game.getPlayer2Id());
             JdbcUtils.setNullableInt(statement, 4, game.getWinnerId());
-            statement.setTimestamp(5, Timestamp.valueOf(game.getStartedAt()));
-            JdbcUtils.setNullableTimestamp(statement, 6, game.getEndedAt());
-            statement.setBoolean(7, game.isRecorded());
-            JdbcUtils.setNullableString(statement, 8, game.getRecordFilePath());
+            statement.setString(5, game.getGameResult().name());
+            statement.setTimestamp(6, Timestamp.valueOf(game.getStartedAt()));
+            JdbcUtils.setNullableTimestamp(statement, 7, game.getEndedAt());
+            statement.setBoolean(8, game.isRecorded());
+            JdbcUtils.setNullableString(statement, 9, game.getRecordFilePath());
+
             int rowsAffected = statement.executeUpdate();
+
             if (rowsAffected > 0) {
-                ResultSet resultSet = statement.getGeneratedKeys();
-                if (resultSet.next()) {
-                    return mapToGame(resultSet);
+                try (var resultSet = statement.getGeneratedKeys()) {
+                    if (resultSet.next()) {
+                        return findById(resultSet.getInt(1)).orElseThrow();
+                    }
                 }
             }
+
         } catch (SQLException e) {
             throw new RuntimeException("Error saving game", e);
         }
+
         return null;
     }
 
@@ -103,17 +112,18 @@ public class GameDaoImpl implements GameDao {
     @Override
     public boolean update(Game game) {
         try {
-            String query = "UPDATE games SET game_type = ?, player1_id = ?, player2_id = ?, winner_id = ?, started_at = ?, ended_at = ?, is_recorded = ?, record_file_path = ? WHERE game_id = ?";
+            String query = "UPDATE games SET game_type = ?, player1_id = ?, player2_id = ?, winner_id = ?, game_result = ?, started_at = ?, ended_at = ?, is_recorded = ?, record_file_path = ? WHERE game_id = ?";
             PreparedStatement statement = connection.prepareStatement(query);
-            statement.setString(1, game.getGameType());
+            statement.setString(1, game.getGameType().name());
             statement.setInt(2, game.getPlayer1Id());
             JdbcUtils.setNullableInt(statement, 3, game.getPlayer2Id());
             JdbcUtils.setNullableInt(statement, 4, game.getWinnerId());
-            statement.setTimestamp(5, Timestamp.valueOf(game.getStartedAt()));
-            JdbcUtils.setNullableTimestamp(statement, 6, game.getEndedAt());
-            statement.setBoolean(7, game.isRecorded());
-            JdbcUtils.setNullableString(statement, 8, game.getRecordFilePath());
-            statement.setInt(9, game.getGameId());
+            statement.setString(5, game.getGameResult().name());
+            statement.setTimestamp(6, Timestamp.valueOf(game.getStartedAt()));
+            JdbcUtils.setNullableTimestamp(statement, 7, game.getEndedAt());
+            statement.setBoolean(8, game.isRecorded());
+            JdbcUtils.setNullableString(statement, 9, game.getRecordFilePath());
+            statement.setInt(10, game.getGameId());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new RuntimeException("Error updating game", e);
@@ -133,23 +143,25 @@ public class GameDaoImpl implements GameDao {
     }
 
     private Game mapToGame(ResultSet resultSet) throws SQLException {
-        Integer player2Id = resultSet.getObject("player2_id", Integer.class);
-        Integer winnerId = resultSet.getObject("winner_id", Integer.class);
-        Timestamp endedAtTimestamp = resultSet.getTimestamp("ended_at");
-        LocalDateTime endedAt = endedAtTimestamp != null ? endedAtTimestamp.toLocalDateTime() : null;
-        String recordFilePath = resultSet.getString("record_file_path");
-        
-        return new Game(
+    Integer player2Id = resultSet.getObject("player2_id", Integer.class);
+    Integer winnerId = resultSet.getObject("winner_id", Integer.class);
+    Timestamp endedAtTimestamp = resultSet.getTimestamp("ended_at");
+    LocalDateTime endedAt = endedAtTimestamp != null ? endedAtTimestamp.toLocalDateTime() : null;
+    String recordFilePath = resultSet.getString("record_file_path");
+    String gameTypeStr = resultSet.getString("game_type");
+    String gameResultStr = resultSet.getString("game_result");
+
+    return new Game(
             resultSet.getInt("game_id"),
-            resultSet.getString("game_type"),
+            GameType.fromString(gameTypeStr),
             resultSet.getInt("player1_id"),
             player2Id,
             winnerId,
+            GameResult.fromString(gameResultStr),
             resultSet.getTimestamp("started_at").toLocalDateTime(),
             endedAt,
             resultSet.getBoolean("is_recorded"),
             recordFilePath
-        );
-    }
+    );
 }
-
+}

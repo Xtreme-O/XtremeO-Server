@@ -1,4 +1,4 @@
-package utils;
+package org.example.xtremo.utils;
 
 
 public class Constants {
