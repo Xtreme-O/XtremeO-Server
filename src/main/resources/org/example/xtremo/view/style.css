@@ -393,7 +393,7 @@
 }
 
 .log-info {
-    -fx-text-fill: #cbd5e1;
+    -fx-text-fill: #3b82f6; /* a nice bright blue */
     -fx-font-weight: 500;
 }
 
