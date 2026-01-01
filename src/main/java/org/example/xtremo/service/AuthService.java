@@ -67,4 +67,9 @@ public class AuthService {
     return PlayerMapper.toDto(savedPlayer);
 }
 
+public  void logout(int playerId){
+        Player player = playerDao.findById(playerId).orElseThrow(()->new RuntimeException("Player not found"));
+        player.setStatus(PlayerStatus.OFFLINE);
+        playerDao.update(player);
+}
 }

@@ -10,7 +10,7 @@ import org.example.xtremo.service.AuthService;
 
 /**
  *
- * @author hosam
+ * @author monaz
  */
 public class LoginController {
 
