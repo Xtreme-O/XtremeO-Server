@@ -17,6 +17,13 @@ import org.example.xtremo.handlers.model.LoginCredintials;
 import org.example.xtremo.handlers.model.RegisterCredintials;
 import org.example.xtremo.model.dto.PlayerDTO;
 import org.example.xtremo.network.protocol.Action;
+import static org.example.xtremo.network.protocol.Action.EXIT;
+import static org.example.xtremo.network.protocol.Action.MOVE;
+import static org.example.xtremo.network.protocol.Action.START;
+import static org.example.xtremo.network.protocol.Action.TURN;
+import static org.example.xtremo.network.protocol.Action.UNKNOWN;
+import static org.example.xtremo.network.protocol.Action.WAITING;
+import static org.example.xtremo.network.protocol.Action.WIN;
 import org.example.xtremo.network.protocol.ActionTypeMapper;
 import org.example.xtremo.network.protocol.MessageType;
 import org.example.xtremo.network.protocol.MessageTypeMapper;
@@ -74,11 +81,20 @@ public class PlayerConnectionHandler implements Runnable {
                 
                 switch (messageType) {
                     case ERROR      -> {break;}
-                    case EVENT      -> {break;}
-                    case REQUEST    -> {break;}
+                    case EVENT      -> {
+                        switch (actionType) {
+                            case EXIT       -> {break;}
+                            case MOVE       -> {break;}
+                            case START      -> {break;}
+                            case TURN       -> {break;}
+                            case UNKNOWN    -> {break;}
+                            case WAITING    -> {break;}
+                            case WIN        -> {break;}
+                            default->       throw new AssertionError();
+                        }
+                        break;
+                    }
                     case RESPONSE   -> {
-                        
-                        
                         switch (actionType) {
                             case REGISTER -> {
                                 System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.INFO, "In REGISTER cluse");
@@ -93,7 +109,6 @@ public class PlayerConnectionHandler implements Runnable {
                                         System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
                                     }
                                     break;
-                            
                             }
                             case LOGIN -> {
                                 System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.INFO, "In LOGIN cluse");
@@ -108,25 +123,11 @@ public class PlayerConnectionHandler implements Runnable {
                                     System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
                                 }
                                 break;
-                                
-                                
                             }
-
-
-                            case DRAW       -> {}
-                            case ERROR      -> {}
-                            case EXIT       -> {}
-                            case MOVE       -> {}
-                            case START      -> {}
-                            case TURN       -> {}
-                            case UNKNOWN    -> {}
-                            case WAITING    -> {}
-                            case WIN        -> {}
-                            default         -> throw new AssertionError();
+                            default -> throw new AssertionError();
                         }
                     }
-                    case UNKNOWN -> {
-                    }
+                    case UNKNOWN -> {break;}
                     default -> throw new AssertionError();
                 }
                 

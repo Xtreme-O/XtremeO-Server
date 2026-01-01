@@ -20,7 +20,7 @@ public class LoginController {
         this.authService = authService;
     }
 
-    public PlayerDTO login(String username, String password) {
+    public PlayerDTO login(String username, String password) throws Exception {
         return authService.login(username, password);
     }
 }
