@@ -1,6 +1,7 @@
 package org.example.xtremo.ui;
 
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import org.example.xtremo.ui.animation.*;
 
 /**
@@ -9,19 +10,22 @@ import org.example.xtremo.ui.animation.*;
  */
 public class AnimationManager {
     
-    private final Parent root;
+    private final Button referenceNode;
     private final CardAnimator cardAnimator;
     private final ButtonAnimator buttonAnimator;
     
-    public AnimationManager(Parent root) {
-        this.root = root;
+    public AnimationManager(Button referenceNode) {
+        this.referenceNode = referenceNode;
         this.cardAnimator = new CardAnimator();
         this.buttonAnimator = new ButtonAnimator();
     }
     
     public void initializeAnimations() {
-        cardAnimator.animateStatCards(root);
-        buttonAnimator.enhanceButtons(root);
+        if (referenceNode != null && referenceNode.getScene() != null) {
+            Parent root = referenceNode.getScene().getRoot();
+            cardAnimator.animateStatCards(root);
+            buttonAnimator.enhanceButtons(root);
+        }
     }
     
     

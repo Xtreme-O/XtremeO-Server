@@ -5,9 +5,10 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.shape.Circle?>
-<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.*?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.chart.XYChart?>
+<?import javafx.scene.CacheHint?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 <?import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid?>
 <?import org.controlsfx.control.ToggleSwitch?>
@@ -55,7 +56,7 @@
     </HBox>
     
     <!-- Main Content -->
-    <ScrollPane fitToWidth="true" styleClass="content-scroll" VBox.vgrow="ALWAYS">
+    <ScrollPane fx:id="mainScrollPane" cache="true" pannable="true" fitToWidth="true" styleClass="content-scroll" VBox.vgrow="ALWAYS">
         <VBox spacing="24" styleClass="main-content">
             <padding>
                 <Insets top="24" right="24" bottom="24" left="24"/>
@@ -75,7 +76,7 @@
                 </columnConstraints>
                 
                 <!-- Card 1: Active Players -->
-                <VBox styleClass="stat-card" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                <VBox styleClass="stat-card, glass-card" cache="true" cacheHint="SPEED" GridPane.columnIndex="0" GridPane.rowIndex="0">
                     <padding>
                         <Insets top="20" right="20" bottom="20" left="20"/>
                     </padding>
@@ -105,7 +106,7 @@
                 </VBox>
                 
                 <!-- Card 2: Live Matches -->
-                <VBox styleClass="stat-card" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                <VBox styleClass="stat-card, glass-card" cache="true" cacheHint="SPEED" GridPane.columnIndex="1" GridPane.rowIndex="0">
                     <padding>
                         <Insets top="20" right="20" bottom="20" left="20"/>
                     </padding>
@@ -148,7 +149,7 @@
                 <!-- Left Column -->
                 <VBox spacing="20" GridPane.columnIndex="0" GridPane.rowIndex="0">
                     <!-- Player Activity Chart -->
-                    <VBox styleClass="chart-container, glass-card">
+                    <VBox styleClass="chart-container, glass-card" cache="true" cacheHint="SPEED">
                         <HBox alignment="CENTER_LEFT" styleClass="chart-header">
                             <padding>
                                 <Insets top="16" right="20" bottom="16" left="20"/>
@@ -167,24 +168,28 @@
                         </HBox>
                         
                         <VBox styleClass="chart-body">
-                            <padding>
-                                <Insets top="20" right="20" bottom="20" left="20"/>
-                            </padding>
                             
                             <!-- Timeline Chart -->
-                            <LineChart fx:id="playerChart" styleClass="player-line-chart" prefHeight="200">
+                            <BarChart fx:id="playerStatusChart" prefHeight="200" styleClass="player-bar-chart"
+                                      categoryGap="150" barGap="0"
+                                      legendVisible="false" 
+                                      animated="false" cache="true" >
                                 <xAxis>
-                                    <NumberAxis side="BOTTOM" label="Time (Hours)" lowerBound="0" upperBound="24" tickUnit="6" styleClass="chart-axis"/>
+                                    <CategoryAxis fx:id="statusAxis" side="BOTTOM" label="Status" 
+                                                  gapStartAndEnd="true" 
+                                                  styleClass="chart-axis"
+                                                  animated="false" />
                                 </xAxis>
                                 <yAxis>
-                                    <NumberAxis side="LEFT" label="Players" lowerBound="0" upperBound="1500" tickUnit="300" styleClass="chart-axis"/>
+                                    <NumberAxis fx:id="playerCountAxis" side="LEFT" label="No. of Players"
+                                                lowerBound="0" upperBound="100" tickUnit="10" styleClass="chart-axis"/>
                                 </yAxis>
-                            </LineChart>
+                            </BarChart>
                         </VBox>
                     </VBox>
                     
                     <!-- Server Logs -->
-                    <VBox styleClass="terminal-container, glass-card">
+                    <VBox styleClass="terminal-container, glass-card" cache="true" cacheHint="SPEED">
                         <HBox alignment="CENTER_LEFT" styleClass="terminal-header">
                             <padding>
                                 <Insets top="16" right="20" bottom="16" left="20"/>
@@ -212,7 +217,7 @@
                 <!-- Right Column -->
                 <VBox GridPane.columnIndex="1" GridPane.rowIndex="0">
                     <!-- Service Controls -->
-                    <VBox styleClass="control-panel, glass-card">
+                    <VBox styleClass="control-panel, glass-card" cache="true" cacheHint="SPEED">
                         <padding>
                             <Insets top="20" right="20" left="20"/>
                         </padding>
@@ -251,7 +256,7 @@
             </GridPane>
             
             <!-- Recent Matches Table -->
-            <VBox styleClass="table-container, glass-card">
+            <VBox styleClass="table-container, glass-card" cache="true" cacheHint="SPEED">
                 <HBox alignment="CENTER_LEFT" styleClass="table-header">
                     <padding>
                         <Insets top="16" right="20" bottom="16" left="20"/>
@@ -261,11 +266,6 @@
                         <Text text="Latest completed games" styleClass="table-subtitle"/>
                     </VBox>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Button text="View All" styleClass="link-btn">
-                        <graphic>
-                            <FontIcon iconLiteral="fas-arrow-right" iconSize="12"/>
-                        </graphic>
-                    </Button>
                 </HBox>
                 
                 <TableView fx:id="matchesTable" styleClass="matches-table" prefHeight="220">

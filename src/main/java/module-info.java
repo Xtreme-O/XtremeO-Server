@@ -3,8 +3,6 @@ module org.example.xtremo {
     requires javafx.fxml;
     requires java.sql;
     requires com.google.gson;
-    requires atlantafx.base;
-    requires animatefx;
     requires org.controlsfx.controls;
     requires org.kordamp.ikonli.core;
     requires org.kordamp.ikonli.javafx;
