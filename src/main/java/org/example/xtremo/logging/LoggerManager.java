@@ -17,17 +17,20 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.example.xtremo.utils.LogStyle;
 
 public final class LoggerManager {
 
     private static final LoggerManager INSTANCE = new LoggerManager();
+    private static final int MAX_LOG_ENTRIES = 100;
 
     private volatile VBox logContainer;
     private volatile ScrollPane scrollPane;
 
-    private final Queue<Runnable> pendingLogs = new ConcurrentLinkedQueue<>();
+    private final Queue<Label> pendingLabels = new ConcurrentLinkedQueue<>();
+    private final AtomicBoolean updateScheduled = new AtomicBoolean(false);
 
     private final DateTimeFormatter formatter
             = DateTimeFormatter.ofPattern("HH:mm:ss");
@@ -47,10 +50,10 @@ public final class LoggerManager {
             }
             this.logContainer = box;
             this.scrollPane = pane;
-            pendingLogs.forEach(Platform::runLater);
-            pendingLogs.clear();
+            if (!pendingLabels.isEmpty()) {
+                scheduleFlush();
+            }
         }
-
     }
 
     public void log(String message) {
@@ -74,29 +77,46 @@ public final class LoggerManager {
     }
 
     private void log(String message, LogStyle style) {
-        Runnable task = () -> {
-            if (logContainer == null || scrollPane == null) {
-                return;
-            }
-
-            Label label = new Label(
-                    "[" + LocalTime.now().format(formatter) + "] " + message
-            );
-
-            label.getStyleClass().add("terminal-log-line");
-            if (style != null) {
-                label.getStyleClass().add(style.getCssClass());
-            }
-
-            logContainer.getChildren().add(label);
-            scrollPane.setVvalue(1.0);
-        };
-
-        if (logContainer == null) {
-            pendingLogs.add(task);
-        } else {
-            Platform.runLater(task);
+        Label label = createLabel(message, style);
+        pendingLabels.add(label);
+        
+        if (logContainer != null && 
+                updateScheduled.compareAndSet(false, true)) {
+            scheduleFlush();
         }
     }
 
+    private Label createLabel(String message, LogStyle style) {
+        Label label = new Label(
+                "[" + LocalTime.now().format(formatter) + "] " + message
+        );
+        label.getStyleClass().add("terminal-log-line");
+        if (style != null) {
+            label.getStyleClass().add(style.getCssClass());
+        }
+        return label;
+    }
+
+    private void scheduleFlush() {
+        Platform.runLater(this::flushPendingLogs);
+    }
+
+    private void flushPendingLogs() {
+        updateScheduled.set(false);
+        
+        if (logContainer == null || scrollPane == null) {
+            return;
+        }
+
+        Label label;
+        while ((label = pendingLabels.poll()) != null) {
+            logContainer.getChildren().add(label);
+        }
+
+        while (logContainer.getChildren().size() > MAX_LOG_ENTRIES) {
+            logContainer.getChildren().remove(0);
+        }
+
+        scrollPane.setVvalue(1.0);
+    }
 }

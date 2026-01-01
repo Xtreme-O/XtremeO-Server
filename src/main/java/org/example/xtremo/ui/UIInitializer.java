@@ -4,12 +4,10 @@ import org.example.xtremo.ui.table.TableManager;
 import java.time.LocalDateTime;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.scene.Parent;
-import javafx.scene.chart.LineChart;
-import javafx.scene.control.TableView;
+import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.layout.VBox;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Button;
+import javafx.scene.control.TableView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,13 +27,11 @@ public class UIInitializer {
     private final TableManager tableManager;
 
     public UIInitializer(
-            Parent root,
-            LineChart<Number, Number> chart,
-            TableView<GameDTO> matchesTable,
-            VBox logContainer,
-            ScrollPane terminalScroll
+            Button stopBtn,
+            BarChart<String, Number> chart,
+            TableView<GameDTO> matchesTable
     ) {
-        this.animationManager = new AnimationManager(root);
+        this.animationManager = new AnimationManager(stopBtn);
         this.chartManager = new ChartManager(chart);
         this.tableManager = new TableManager(matchesTable);
     }
@@ -57,16 +53,10 @@ public class UIInitializer {
         new Thread(() -> {
             LoggerManager.getInstance().success("Loading chart data...");
 
-            List<XYChart.Data<Number, Number>> chartData = new ArrayList<>();
-            double[] hourlyData = {
-                250, 180, 120, 95, 110, 180,
-                320, 480, 650, 720, 680, 750,
-                820, 880, 920, 980, 1050, 1150,
-                1200, 1180, 1100, 950, 680, 420
-            };
-            for (int hour = 0; hour < hourlyData.length; hour++) {
-                chartData.add(new XYChart.Data<>(hour, hourlyData[hour]));
-            }
+            List<XYChart.Data<String, Number>> chartData = new ArrayList<>();
+            chartData.add(new XYChart.Data<>("Online", 40));
+            chartData.add(new XYChart.Data<>("Offline", 30));
+            chartData.add(new XYChart.Data<>("In-Game", 20));
 
             Platform.runLater(() -> {
                 chartManager.setupChart(FXCollections.observableArrayList(chartData));
