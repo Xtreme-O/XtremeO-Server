@@ -11,4 +11,10 @@ public record PlayerDTO(
     LocalDateTime createdAt,
     LocalDateTime lastLogin
 ) {
+
+    @Override
+    public String toString() {
+        return "PlayerDTO{" + "id=" + id + ", username=" + username + ", avatarUrl=" + avatarUrl + ", status=" + status + ", createdAt=" + createdAt + ", lastLogin=" + lastLogin + '}';
+    }
+    
 }

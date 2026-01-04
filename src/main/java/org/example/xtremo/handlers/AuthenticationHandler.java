@@ -4,9 +4,11 @@
  */
 package org.example.xtremo.handlers;
 
-import org.example.xtremo.handlers.model.LoginCredintials;
-import org.example.xtremo.handlers.model.RegisterCredintials;
+
 import org.example.xtremo.model.dto.PlayerDTO;
+import org.example.xtremo.network.protocol.LoginBody;
+import org.example.xtremo.network.protocol.RegisterBody;
+import org.example.xtremo.network.protocol.RequestEnvelope;
 import org.example.xtremo.service.AuthService;
 
 /**
@@ -16,11 +18,13 @@ import org.example.xtremo.service.AuthService;
 public class AuthenticationHandler {
 
     private AuthenticationHandler() {}
-        
     
-    public static PlayerDTO handleLogin(AuthService authService, LoginCredintials credintials) throws Exception{
+    public static PlayerDTO handleLogin(AuthService authService, RequestEnvelope<LoginBody> request) throws Exception{
         try {
-            return authService.login(credintials.userName(), credintials.password());
+            
+            LoginBody body = request.getBody();
+            
+            return authService.login(body.getUsername(),body.getPassword());
             
         } catch (Exception e) {
             throw e;
@@ -28,9 +32,10 @@ public class AuthenticationHandler {
         
    
     }
-    public static PlayerDTO handleRegister(AuthService authService, RegisterCredintials credintials) throws Exception{
+    public static PlayerDTO handleRegister(AuthService authService, RequestEnvelope<RegisterBody> request) throws Exception{
         try {
-            return authService.register(credintials.userName(), credintials.password(), credintials.avatar_url());
+            RegisterBody body = request.getBody();
+            return authService.register(body.getUsername(), body.getPassword(), body.getAvtar_url());
         } catch (Exception e) {
             throw e;
         }
