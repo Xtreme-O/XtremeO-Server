@@ -3,6 +3,8 @@ module org.example.xtremo {
     requires javafx.fxml;
     requires java.sql;
     requires com.google.gson;
+    opens org.example.xtremo.network.protocol to com.google.gson;
+    opens org.example.xtremo.network.protocol.models to com.google.gson;
 
     
     opens org.example.xtremo.controller to javafx.fxml;

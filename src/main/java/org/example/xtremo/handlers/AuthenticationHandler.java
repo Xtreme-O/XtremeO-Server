@@ -6,9 +6,10 @@ package org.example.xtremo.handlers;
 
 
 import org.example.xtremo.model.dto.PlayerDTO;
-import org.example.xtremo.network.protocol.LoginBody;
-import org.example.xtremo.network.protocol.RegisterBody;
+import org.example.xtremo.network.protocol.models.LoginBody;
+import org.example.xtremo.network.protocol.models.RegisterBody;
 import org.example.xtremo.network.protocol.RequestEnvelope;
+import org.example.xtremo.network.protocol.models.LogoutBody;
 import org.example.xtremo.service.AuthService;
 
 /**
@@ -41,4 +42,15 @@ public class AuthenticationHandler {
         }
         
     }
+    
+    public static boolean handleLogout(AuthService authService, RequestEnvelope<LogoutBody> request) throws Exception{
+         try {
+            LogoutBody body = request.getBody();
+            return authService.logout(body.username);
+        } catch (Exception e) {
+            throw e;
+        }
+        
+    }
+    
 }

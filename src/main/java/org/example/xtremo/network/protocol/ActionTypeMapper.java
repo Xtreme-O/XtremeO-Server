@@ -24,6 +24,7 @@ public class ActionTypeMapper {
             case "DRAW"     -> Action.DRAW;
             case "EXIT"     -> Action.EXIT;
             case "ERROR"    -> Action.ERROR;
+            case "LOGOUT"    -> Action.LOGOUT;
             case "UNKNOWN"  -> Action.UNKNOWN;
             default         -> Action.UNKNOWN;
         };

@@ -11,6 +11,7 @@ package org.example.xtremo.network.protocol;
 public enum Action {
     LOGIN,
     REGISTER,
+    LOGOUT,
     START,
     WAITING,
     TURN,
