@@ -19,7 +19,7 @@ public class RegisterController {
         this.authService = authService;
     }
 
-    public PlayerDTO register(String username, String password, String avatarUrl) {
+    public PlayerDTO register(String username, String password, String avatarUrl) throws Exception {
         return authService.register(username, password, avatarUrl);
     }
 }
