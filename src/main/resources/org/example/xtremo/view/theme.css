@@ -1,0 +1,102 @@
+/**
+ * XtremO Theme - Minimal & Fast
+ * @author Abdelrahman
+ */
+
+/* ========== ROOT ========== */
+.root {
+    -fx-font-family: "Segoe UI", "SF Pro Display", Arial, sans-serif;
+    -fx-font-size: 14px;
+    -fx-base: #1e1e1e;
+    -fx-background: #1a1a1a;
+    -fx-control-inner-background: #2a2a2a;
+    -fx-text-box-border: #3a3a3a;
+    -fx-text-base-color: #e0e0e0;
+}
+
+.root-container {
+    -fx-background-color: #1a1a1a;
+}
+
+/* ========== BUTTONS ========== */
+.btn-primary {
+    -fx-background-color: #f4af25;
+    -fx-text-fill: #1a1a1a;
+    -fx-font-weight: 600;
+    -fx-font-size: 12px;
+    -fx-padding: 8 16;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+.btn-primary:hover { -fx-background-color: #ffbe3d; }
+.btn-primary:pressed { -fx-background-color: #e09d1f; }
+.btn-primary .ikonli-font-icon { -fx-icon-color: #1a1a1a; -fx-padding: 0 6 0 0; }
+
+.btn-restart {
+    -fx-background-color: #fbbf24;
+    -fx-text-fill: #1a1a1a;
+    -fx-font-weight: 600;
+    -fx-font-size: 12px;
+    -fx-padding: 8 16;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+.btn-restart:hover { -fx-background-color: #f59e0b; }
+.btn-restart:pressed { -fx-background-color: #d97706; }
+.btn-restart .ikonli-font-icon { -fx-icon-color: #1a1a1a; -fx-padding: 0 6 0 0; }
+
+.btn-danger {
+    -fx-background-color: #ef4444;
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+    -fx-font-size: 12px;
+    -fx-padding: 8 16;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+.btn-danger:hover { -fx-background-color: #dc2626; }
+.btn-danger:pressed { -fx-background-color: #b91c1c; }
+.btn-danger .ikonli-font-icon { -fx-icon-color: white; -fx-padding: 0 6 0 0; }
+
+.btn-success {
+    -fx-background-color: #22c55e;
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+    -fx-font-size: 12px;
+    -fx-padding: 8 16;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+.btn-success:hover { -fx-background-color: #16a34a; }
+.btn-success:pressed { -fx-background-color: #15803d; }
+.btn-success .ikonli-font-icon { -fx-icon-color: white; -fx-padding: 0 6 0 0; }
+
+/* ========== GLASS CARD ========== */
+.glass-card {
+    -fx-background-color: #2a2a2a;
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 16;
+    -fx-border-width: 1;
+}
+.glass-card:hover {
+    -fx-border-color: rgba(244, 175, 37, 0.25);
+    -fx-effect: dropshadow(one-pass-box, rgba(244, 175, 37, 0.2), 6, 0, 0, 3);
+}
+
+/* ========== SCROLLBAR ========== */
+.scroll-bar { -fx-background-color: transparent; }
+.scroll-bar .thumb { -fx-background-color: rgba(244, 175, 37, 0.4); -fx-background-radius: 6; }
+.scroll-bar .thumb:hover { -fx-background-color: rgba(244, 175, 37, 0.7); }
+.scroll-bar .track { -fx-background-color: rgba(100, 116, 139, 0.15); -fx-background-radius: 6; }
+.scroll-bar .increment-button, .scroll-bar .decrement-button { -fx-background-color: transparent; -fx-padding: 0; }
+
+/* ========== TOGGLE SWITCH ========== */
+.toggle-switch { -fx-cursor: hand; }
+.toggle-switch .thumb { -fx-background-color: white; }
+.toggle-switch .thumb-area { -fx-background-color: #475569; -fx-background-radius: 14px; }
+.toggle-switch:selected .thumb-area { -fx-background-color: #f4af25; }
+
+/* ========== PROGRESS BAR ========== */
+.progress-bar { -fx-pref-height: 8; -fx-background-color: rgba(100, 116, 139, 0.2); -fx-background-radius: 4; }
+.progress-bar .bar { -fx-background-color: #f4af25; -fx-background-radius: 4; }

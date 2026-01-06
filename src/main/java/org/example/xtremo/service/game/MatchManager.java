@@ -4,7 +4,6 @@
  */
 package org.example.xtremo.service.game;
 
-import java.util.LinkedList;
 import java.util.Vector;
 import org.example.xtremo.network.ClientHandler;
 import org.example.xtremo.network.protocol.Action;

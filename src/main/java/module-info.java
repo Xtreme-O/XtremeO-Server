@@ -7,9 +7,12 @@ module org.example.xtremo {
     opens org.example.xtremo.network.protocol.models to com.google.gson;
     opens org.example.xtremo.model.dto to com.google.gson;
     opens org.example.xtremo.model.enums to com.google.gson;
+    requires org.controlsfx.controls;
+    requires org.kordamp.ikonli.core;
+    requires org.kordamp.ikonli.javafx;
+    requires org.kordamp.ikonli.fontawesome5;
+
     
     opens org.example.xtremo.controller to javafx.fxml;
-    opens org.example.xtremo.view to javafx.fxml;
-
     exports org.example.xtremo.app;
 }
