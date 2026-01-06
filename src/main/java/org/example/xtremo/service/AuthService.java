@@ -4,9 +4,11 @@
  */
 package org.example.xtremo.service;
 
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import org.example.xtremo.dao.PlayerDao;
+import org.example.xtremo.dao.PlayerDaoImpl;
 import org.example.xtremo.mapper.PlayerMapper;
 import org.example.xtremo.model.dto.PlayerDTO;
 import org.example.xtremo.model.entity.Player;
@@ -24,6 +26,12 @@ public class AuthService {
     public AuthService(PlayerDao playerDao) {
         this.playerDao = playerDao;
     }
+
+    public AuthService() throws SQLException {
+        playerDao = new PlayerDaoImpl();
+        
+    }
+    
 
     public PlayerDTO login(String username, String password) throws Exception {
 

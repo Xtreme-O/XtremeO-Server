@@ -11,10 +11,10 @@ public class DBConnection {
     private static final String DB_URL = "db.url";
     private static final String DB_USERNAME = "db.username";
     private static final String DB_PASSWORD = "db.password";
-    
-    
-    private DBConnection() {}
 
+    private DBConnection() {
+        throw new IllegalAccessError();
+    }
 
     static {
         try {

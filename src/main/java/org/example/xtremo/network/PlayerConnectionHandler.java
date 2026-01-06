@@ -20,7 +20,7 @@ import org.example.xtremo.network.protocol.Action;
 import org.example.xtremo.network.protocol.ActionTypeMapper;
 import org.example.xtremo.network.protocol.models.LoginBody;
 import org.example.xtremo.network.protocol.models.RegisterBody;
-import org.example.xtremo.network.protocol.RequestEnvelope;
+import org.example.xtremo.network.protocol.ProtocolMessageEnvelope;
 import org.example.xtremo.network.protocol.RequestHeader;
 import org.example.xtremo.network.protocol.models.LogoutBody;
 import org.example.xtremo.service.AuthService;
@@ -61,32 +61,27 @@ public class PlayerConnectionHandler implements Runnable {
                     break;
                 }
 
-                Gson gson = new GsonBuilder()
-                        .setPrettyPrinting()
-                        .registerTypeAdapter(RequestHeader.class,
-                                new RequestHeaderAdapter())
-                        .create();
+                Gson gson = PlayerNetworkOperations.getGsonConverter();
 
                 JsonObject root = JsonParser.parseString(message).getAsJsonObject();
-
-                JsonObject headers = root.get("header").getAsJsonObject();
-                JsonObject headerObj = root.getAsJsonObject("header");
-                String action = headerObj.get("action").getAsString();
+                String action = root
+                        .getAsJsonObject("header")
+                        .get("action")
+                        .getAsString();
 
                 System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.INFO, message);
 
                 Action actionType = ActionTypeMapper.getActionType(action);
-                AuthService authService = new AuthService(new PlayerDaoImpl(DBConnection.getConnection()));
+                AuthService authService = new AuthService();
 
                 switch (actionType) {
                     case LOGIN -> {
                         try {
-                            RequestEnvelope<LoginBody> req
-                                    = gson.fromJson(root,
-                                            new TypeToken<RequestEnvelope<LoginBody>>() {
-                                            }.getType());
+                            ProtocolMessageEnvelope<LoginBody> req = gson.fromJson(root, new TypeToken<ProtocolMessageEnvelope<LoginBody>>() {
+                            }.getType());
                             PlayerDTO pdto = AuthenticationHandler.handleLogin(authService, req);
-                            System.out.println(pdto);
+                            ProtocolMessageEnvelope<PlayerDTO> response = new ProtocolMessageEnvelope<>(new RequestHeader("JSON", "RESPONSE"), pdto);
+                            PlayerNetworkOperations.sendResponse(response, dos);
 
                         } catch (Exception ex) {
                             System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
@@ -95,13 +90,11 @@ public class PlayerConnectionHandler implements Runnable {
                     }
                     case REGISTER -> {
                         try {
-                            RequestEnvelope<RegisterBody> req
-                                    = gson.fromJson(root,
-                                            new TypeToken<RequestEnvelope<RegisterBody>>() {
-                                            }.getType());
+                            ProtocolMessageEnvelope<RegisterBody> req = gson.fromJson(root, new TypeToken<ProtocolMessageEnvelope<RegisterBody>>() {
+                            }.getType());
                             PlayerDTO pdto = AuthenticationHandler.handleRegister(authService, req);
-                            System.out.println(pdto);
-
+                            ProtocolMessageEnvelope<PlayerDTO> response = new ProtocolMessageEnvelope<>(new RequestHeader("JSON", "RESPONSE"), pdto);
+                            PlayerNetworkOperations.sendResponse(response, dos);
                         } catch (Exception ex) {
                             System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
                         }
@@ -109,7 +102,7 @@ public class PlayerConnectionHandler implements Runnable {
                     }
 
                     case LOGOUT -> {
-                        RequestEnvelope<LogoutBody> req = gson.fromJson(root, new TypeToken<RequestEnvelope<LogoutBody>>() {
+                        ProtocolMessageEnvelope<LogoutBody> req = gson.fromJson(root, new TypeToken<ProtocolMessageEnvelope<LogoutBody>>() {
                         }.getType());
                         boolean isUserLogedOut;
                         try {
@@ -130,56 +123,10 @@ public class PlayerConnectionHandler implements Runnable {
 
                 }
 
-//                    case RESPONSE   -> {
-//                        switch (actionType) {
-//                            case REGISTER -> {
-//                                System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.INFO, "In REGISTER cluse");
-//                                    try {
-//                                        RegisterCredintials credintials = AuthenticationPlayerParser.parseFromJasonToPlayerRegisterCredintials(obj);
-//                                        System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.INFO, () -> credintials.userName() +" "+ credintials.password());
-//                                        PlayerDTO player = AuthenticationHandler.handleRegister(authService, credintials);
-//                                        System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.INFO, "User has registered{0}", player.username());
-//                                    } catch (SQLException | RuntimeException ex) {
-//                                        System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-//                                    } catch (Exception ex) {
-//                                        System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-//                                    }
-//                                    break;
-//                            }
-//                            case LOGIN -> {
-//                                System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.INFO, "In LOGIN cluse");
-//                                try {
-//                                    LoginCredintials credintials = AuthenticationPlayerParser.parseFromJasonToPlayerLoginCredintials(obj);
-//                                    System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.INFO, () -> credintials.userName() + credintials.password());
-//                                    PlayerDTO player = AuthenticationHandler.handleLogin(authService, credintials);
-//                                    System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.INFO, "User has logged in{0}", player.username());
-//                                } catch (SQLException ex) {
-//                                    System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-//                                } catch (Exception ex) {
-//                                    System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-//                                }
-//                                break;
-//                            }
-//                            default -> throw new AssertionError();
-//                        }
-//                    }
-//               
-//                String type = header.get("type").getAsString();
-//                String username = data.get("username").getAsString();
-//                String password = data.get("password").getAsString();
-//                System.out.println("action = " + action);
-//                System.out.println("type = " + type);
-//                System.out.println("username = " + username);
-//                System.out.println("password = " + password);
-//                System.out.println("Received: " + obj.getAsString());
             }
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SQLException ex) {
-            System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        } catch (IOException | SQLException e) {
+            System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, e);
         }
     }
 }
-
-//} "{"header": { "action": "LOGIN", "type":"Response" },"data": { "username": "username","password":"user hashed password" }}";

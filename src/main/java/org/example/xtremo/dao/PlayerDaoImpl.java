@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.example.xtremo.database.DBConnection;
 import org.example.xtremo.model.enums.PlayerStatus;
 
 public class PlayerDaoImpl implements PlayerDao {
@@ -19,6 +20,10 @@ public class PlayerDaoImpl implements PlayerDao {
 
     public PlayerDaoImpl(Connection connection) {
         this.connection = connection;
+    }
+
+    public PlayerDaoImpl() throws SQLException {
+        this.connection = DBConnection.getConnection();
     }
 
     @Override
@@ -31,17 +36,17 @@ public class PlayerDaoImpl implements PlayerDao {
             statement.setString(4, player.getStatus().name());
             int rowsAffected = statement.executeUpdate();
             if (rowsAffected > 0) {
-               var resultSet = statement.getGeneratedKeys();
-               if(resultSet.next()) {
-                   return findById(resultSet.getInt(1)).orElseThrow();
-               }
+                var resultSet = statement.getGeneratedKeys();
+                if (resultSet.next()) {
+                    return findById(resultSet.getInt(1)).orElseThrow();
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error saving player", e);
         }
 
-    return null;
-}
+        return null;
+    }
 
     @Override
     public Optional<Player> findById(int playerId) {
