@@ -3,6 +3,7 @@ package org.example.xtremo.network;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -35,11 +36,14 @@ public class Server implements Runnable{
             while(running){
                 Socket player = server.accept();
                 clientPool.submit(new PlayerConnectionHandler(player));
-                System.getLogger(Server.class.getName()).log(System.Logger.Level.INFO,"New client has joined");
+                System.getLogger(Server.class.getName()).log(System.Logger.Level.WARNING,"New client has joined");
 //                System.out.println("New client has joined");
             }
-        } catch (IOException ex) {
-            System.getLogger(Server.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }catch(SocketException e){
+            System.getLogger(Server.class.getName()).log(System.Logger.Level.WARNING, e.getLocalizedMessage());
+        }
+        catch (IOException e) {
+            System.getLogger(Server.class.getName()).log(System.Logger.Level.WARNING, e.getLocalizedMessage());
         }
     }
 }
