@@ -15,6 +15,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import org.example.xtremo.custom_exceptions.CustomException;
 import org.example.xtremo.handlers.AuthenticationHandler;
 import org.example.xtremo.model.dto.PlayerDTO;
 import org.example.xtremo.network.protocol.Action;
@@ -28,7 +29,7 @@ import org.example.xtremo.network.protocol.models.InviteBody;
 import org.example.xtremo.network.protocol.models.LoginBody;
 import org.example.xtremo.network.protocol.models.LogoutBody;
 import org.example.xtremo.network.protocol.models.RegisterBody;
-import org.example.xtremo.network.session.SessionPlayer;
+import org.example.xtremo.session.SessionPlayer;
 import org.example.xtremo.service.AuthService;
 import org.example.xtremo.utils.DateTimeGsonAdapter;
 import org.example.xtremo.utils.RequestHeaderAdapter;
@@ -55,10 +56,12 @@ public class PlayerNetworkOperations {
 
     public static void sendResponse(ProtocolMessageEnvelope message, DataOutputStream out) throws IOException {
         String responseString = PlayerNetworkOperations.gsonConverter.toJson(message);
+        int length = responseString.length();
+        out.write(length);
         out.writeUTF(responseString);
     }
 
-    public static void handleClientActionRequest(JsonObject rootJsonObject, PlayerConnectionHandler client) throws SQLException {
+    public static void handleClientActionRequest(JsonObject rootJsonObject, PlayerConnectionHandler client) throws SQLException, Exception {
         AuthService authService = AuthService.getAuthService();
         String action = rootJsonObject
                 .getAsJsonObject("header")
@@ -73,7 +76,7 @@ public class PlayerNetworkOperations {
                     }.getType());
                     PlayerDTO pdto = AuthenticationHandler.handleLogin(authService, req);
                     ProtocolMessageEnvelope<PlayerDTO> response = new ProtocolMessageEnvelope<>(new RequestHeader("JSON", "RESPONSE"), pdto);
-                    Server.activePlayers.add(new SessionPlayer(Server.getNextAvailableId(), client));
+                    Server.activePlayers.put(pdto.id(), client);
                     PlayerNetworkOperations.sendResponse(response, client.getDos());
 
                 } catch (Exception ex) {
@@ -113,16 +116,25 @@ public class PlayerNetworkOperations {
                 ProtocolMessageEnvelope<InviteBody> req = gsonConverter.fromJson(rootJsonObject, new TypeToken<ProtocolMessageEnvelope<InviteBody>>() {
                 }.getType());
                 System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) gsonConverter.toJson(req));
-
-                InviteBody body = new InviteBody(req.getBody().getPlayer1(), req.getBody().getPlayer2());
-
-                ProtocolMessageEnvelope<InviteBody> response = new ProtocolMessageEnvelope<>(new RequestHeader("JSON", "INVITE"), body);
+                
+                PlayerDTO reciver = req.getBody().getPlayer2();
+                PlayerDTO sender = req.getBody().getPlayer1();
+                PlayerConnectionHandler reciverHandler = Server.activePlayers.getOrDefault(reciver.id(), null);
+                if (reciverHandler == null) {
+                    throw new CustomException.InviteError("User not active right now.");
+                }
                 try {
-                    PlayerNetworkOperations.sendResponse(response, client.getDos());
+                    PlayerNetworkOperations.sendResponse(req, reciverHandler.getDos());
                 } catch (IOException ex) {
                     System.getLogger(PlayerNetworkOperations.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
                 }
 
+            }
+            case CONFIRM_INVITE -> {
+                
+                
+                
+                
             }
 
             default -> {

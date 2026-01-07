@@ -2,9 +2,8 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package org.example.xtremo.network.session;
+package org.example.xtremo.session;
 
-import org.example.xtremo.network.session.SessionPlayer;
 import java.io.IOException;
 import org.example.xtremo.network.PlayerNetworkOperations;
 import org.example.xtremo.network.protocol.ProtocolMessageEnvelope;

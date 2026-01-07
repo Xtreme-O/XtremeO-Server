@@ -14,6 +14,9 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
 import java.sql.SQLException;
+import org.example.xtremo.custom_exceptions.CustomException;
+import org.example.xtremo.network.protocol.ProtocolMessageEnvelope;
+import org.example.xtremo.network.protocol.RequestHeader;
 
 /**
  *
@@ -72,6 +75,18 @@ public class PlayerConnectionHandler implements Runnable {
 
         } catch (IOException | SQLException e) {
             System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, e);
+        } catch (Exception ex) {
+            if (ex instanceof CustomException.InviteError inviteError) {
+                try {
+                    RequestHeader header = new RequestHeader("JSON", "INVITE_ERROR");
+                    ProtocolMessageEnvelope<Exception> message = new ProtocolMessageEnvelope<>(header, inviteError);
+                    PlayerNetworkOperations.sendResponse(message, dos);
+                } catch (IOException ex1) {
+                    System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex1);
+                }
+            }
+            
+            System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
     }
 }

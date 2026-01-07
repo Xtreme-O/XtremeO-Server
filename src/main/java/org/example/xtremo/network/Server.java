@@ -4,29 +4,20 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.Vector;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import org.example.xtremo.network.session.SessionPlayer;
 
 public class Server implements Runnable {
 
     ServerSocket server;
     private volatile boolean running = false;
 //    int serverPort = Integer.parseInt(ConfigLoader.getProperty("server_port"));
-    public static Vector<SessionPlayer> activePlayers = new Vector<>();
+    
+    public static Map<Integer,PlayerConnectionHandler> activePlayers = new HashMap<>();
 
-    public static int getNextAvailableId() {
-        if (activePlayers.isEmpty()) {
-            return 1;
-        }
-        return activePlayers.stream()
-                .mapToInt(SessionPlayer::getId)
-                .max()
-                .orElse(0) + 1;
-    }
-
-    private ExecutorService clientPool = Executors.newFixedThreadPool(50);
+    private final ExecutorService clientPool = Executors.newFixedThreadPool(50);
 
     public void stop() throws IOException {
         running = false;

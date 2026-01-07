@@ -14,20 +14,21 @@ public class ActionTypeMapper {
     public static Action getActionType(String message){
         
        return switch (message.toUpperCase()) {
-            case "LOGIN"    -> Action.LOGIN;
-            case "REGISTER" -> Action.REGISTER;
-            case "START"    -> Action.START;
-            case "WAITING"  -> Action.WAITING;
-            case "TURN"     -> Action.TURN;
-            case "MOVE"     -> Action.MOVE;
-            case "WIN"      -> Action.WIN;
-            case "DRAW"     -> Action.DRAW;
-            case "EXIT"     -> Action.EXIT;
-            case "ERROR"    -> Action.ERROR;
-            case "LOGOUT"    -> Action.LOGOUT;
-            case "UNKNOWN"  -> Action.UNKNOWN;
-            case "INVITE"  -> Action.INVITE;
-            default         -> Action.UNKNOWN;
+            case "LOGIN"            -> Action.LOGIN;
+            case "REGISTER"         -> Action.REGISTER;
+            case "START"            -> Action.START;
+            case "WAITING"          -> Action.WAITING;
+            case "TURN"             -> Action.TURN;
+            case "MOVE"             -> Action.MOVE;
+            case "WIN"              -> Action.WIN;
+            case "DRAW"             -> Action.DRAW;
+            case "EXIT"             -> Action.EXIT;
+            case "ERROR"            -> Action.ERROR;
+            case "LOGOUT"           -> Action.LOGOUT;
+            case "UNKNOWN"          -> Action.UNKNOWN;
+            case "INVITE"           -> Action.INVITE;
+            case "CONFIRM_INVITE"   -> Action.CONFIRM_INVITE;
+            default                 -> Action.UNKNOWN;
         };
         
         
