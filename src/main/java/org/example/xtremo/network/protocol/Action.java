@@ -20,5 +20,6 @@ public enum Action {
     DRAW,
     EXIT,
     ERROR,
-    UNKNOWN
+    UNKNOWN,
+    INVITE,
 }

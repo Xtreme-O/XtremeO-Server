@@ -7,25 +7,34 @@ import java.net.SocketException;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.example.xtremo.network.session.SessionPlayer;
 
+public class Server implements Runnable {
 
-public class Server implements Runnable{
-    
     ServerSocket server;
     private volatile boolean running = false;
 //    int serverPort = Integer.parseInt(ConfigLoader.getProperty("server_port"));
-    public static Vector<PlayerConnectionHandler> players = new Vector<>();
-    
+    public static Vector<SessionPlayer> activePlayers = new Vector<>();
+
+    public static int getNextAvailableId() {
+        if (activePlayers.isEmpty()) {
+            return 1;
+        }
+        return activePlayers.stream()
+                .mapToInt(SessionPlayer::getId)
+                .max()
+                .orElse(0) + 1;
+    }
+
     private ExecutorService clientPool = Executors.newFixedThreadPool(50);
-    
+
     public void stop() throws IOException {
         running = false;
         server.close();
         clientPool.shutdown();
     }
-    
-    
-    public Server(){
+
+    public Server() {
         running = true;
     }
 
@@ -33,16 +42,14 @@ public class Server implements Runnable{
     public void run() {
         try {
             this.server = new ServerSocket(6666);
-            while(running){
+            while (running) {
                 Socket player = server.accept();
                 clientPool.submit(new PlayerConnectionHandler(player));
-                System.getLogger(Server.class.getName()).log(System.Logger.Level.WARNING,"New client has joined");
-//                System.out.println("New client has joined");
+                System.getLogger(Server.class.getName()).log(System.Logger.Level.WARNING, "New client has joined");
             }
-        }catch(SocketException e){
+        } catch (SocketException e) {
             System.getLogger(Server.class.getName()).log(System.Logger.Level.WARNING, e.getLocalizedMessage());
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             System.getLogger(Server.class.getName()).log(System.Logger.Level.WARNING, e.getLocalizedMessage());
         }
     }

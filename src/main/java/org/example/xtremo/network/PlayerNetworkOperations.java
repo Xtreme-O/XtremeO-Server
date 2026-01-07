@@ -6,11 +6,30 @@ package org.example.xtremo.network;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
+import org.example.xtremo.handlers.AuthenticationHandler;
+import org.example.xtremo.model.dto.PlayerDTO;
+import org.example.xtremo.network.protocol.Action;
+import static org.example.xtremo.network.protocol.Action.LOGIN;
+import static org.example.xtremo.network.protocol.Action.LOGOUT;
+import static org.example.xtremo.network.protocol.Action.REGISTER;
+import org.example.xtremo.network.protocol.ActionTypeMapper;
 import org.example.xtremo.network.protocol.ProtocolMessageEnvelope;
 import org.example.xtremo.network.protocol.RequestHeader;
+import org.example.xtremo.network.protocol.models.InviteBody;
+import org.example.xtremo.network.protocol.models.LoginBody;
+import org.example.xtremo.network.protocol.models.LogoutBody;
+import org.example.xtremo.network.protocol.models.RegisterBody;
+import org.example.xtremo.network.session.SessionPlayer;
+import org.example.xtremo.service.AuthService;
 import org.example.xtremo.utils.DateTimeGsonAdapter;
 import org.example.xtremo.utils.RequestHeaderAdapter;
 
@@ -37,6 +56,80 @@ public class PlayerNetworkOperations {
     public static void sendResponse(ProtocolMessageEnvelope message, DataOutputStream out) throws IOException {
         String responseString = PlayerNetworkOperations.gsonConverter.toJson(message);
         out.writeUTF(responseString);
+    }
+
+    public static void handleClientActionRequest(JsonObject rootJsonObject, PlayerConnectionHandler client) throws SQLException {
+        AuthService authService = AuthService.getAuthService();
+        String action = rootJsonObject
+                .getAsJsonObject("header")
+                .get("action")
+                .getAsString();
+
+        Action actionType = ActionTypeMapper.getActionType(action);
+        switch (actionType) {
+            case LOGIN -> {
+                try {
+                    ProtocolMessageEnvelope<LoginBody> req = gsonConverter.fromJson(rootJsonObject, new TypeToken<ProtocolMessageEnvelope<LoginBody>>() {
+                    }.getType());
+                    PlayerDTO pdto = AuthenticationHandler.handleLogin(authService, req);
+                    ProtocolMessageEnvelope<PlayerDTO> response = new ProtocolMessageEnvelope<>(new RequestHeader("JSON", "RESPONSE"), pdto);
+                    Server.activePlayers.add(new SessionPlayer(Server.getNextAvailableId(), client));
+                    PlayerNetworkOperations.sendResponse(response, client.getDos());
+
+                } catch (Exception ex) {
+                    System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+                }
+
+            }
+            case REGISTER -> {
+                try {
+                    ProtocolMessageEnvelope<RegisterBody> req = gsonConverter.fromJson(rootJsonObject, new TypeToken<ProtocolMessageEnvelope<RegisterBody>>() {
+                    }.getType());
+                    PlayerDTO pdto = AuthenticationHandler.handleRegister(authService, req);
+                    ProtocolMessageEnvelope<PlayerDTO> response = new ProtocolMessageEnvelope<>(new RequestHeader("JSON", "RESPONSE"), pdto);
+                    PlayerNetworkOperations.sendResponse(response, client.getDos());
+                } catch (Exception ex) {
+                    System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+                }
+
+            }
+
+            case LOGOUT -> {
+                ProtocolMessageEnvelope<LogoutBody> req = gsonConverter.fromJson(rootJsonObject, new TypeToken<ProtocolMessageEnvelope<LogoutBody>>() {
+                }.getType());
+                boolean isUserLogedOut;
+                try {
+                    isUserLogedOut = AuthenticationHandler.handleLogout(authService, req);
+
+                    if (isUserLogedOut) {
+                        System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.INFO, (String) "User loged out");
+                    }
+                } catch (Exception ex) {
+                    System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+                }
+
+            }
+            case INVITE -> {
+                ProtocolMessageEnvelope<InviteBody> req = gsonConverter.fromJson(rootJsonObject, new TypeToken<ProtocolMessageEnvelope<InviteBody>>() {
+                }.getType());
+                System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) gsonConverter.toJson(req));
+
+                InviteBody body = new InviteBody(req.getBody().getPlayer1(), req.getBody().getPlayer2());
+
+                ProtocolMessageEnvelope<InviteBody> response = new ProtocolMessageEnvelope<>(new RequestHeader("JSON", "INVITE"), body);
+                try {
+                    PlayerNetworkOperations.sendResponse(response, client.getDos());
+                } catch (IOException ex) {
+                    System.getLogger(PlayerNetworkOperations.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+                }
+
+            }
+
+            default -> {
+                throw new AssertionError();
+            }
+
+        }
     }
 
 }

@@ -15,7 +15,7 @@ import org.example.xtremo.network.protocol.DataType;
 import org.example.xtremo.network.protocol.Header;
 import org.example.xtremo.network.protocol.Message;
 import org.example.xtremo.network.protocol.MessageType;
-import org.example.xtremo.network.protocol.Move;
+import org.example.xtremo.network.protocol.models.Move;
 import org.example.xtremo.service.game.Match;
 import org.example.xtremo.service.game.MatchManager;
 

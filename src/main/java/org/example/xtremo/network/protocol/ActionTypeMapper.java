@@ -26,6 +26,7 @@ public class ActionTypeMapper {
             case "ERROR"    -> Action.ERROR;
             case "LOGOUT"    -> Action.LOGOUT;
             case "UNKNOWN"  -> Action.UNKNOWN;
+            case "INVITE"  -> Action.INVITE;
             default         -> Action.UNKNOWN;
         };
         
