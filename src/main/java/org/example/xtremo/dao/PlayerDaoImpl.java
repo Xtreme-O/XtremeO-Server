@@ -17,6 +17,11 @@ import org.example.xtremo.model.enums.PlayerStatus;
 public class PlayerDaoImpl implements PlayerDao {
 
     private final Connection connection;
+    private static OnDatabaseChangeListener dbListener;
+
+    public static void setOnDatabaseChangeListener(OnDatabaseChangeListener listener) {
+        dbListener = listener;
+    }
 
     public PlayerDaoImpl(Connection connection) {
         this.connection = connection;
@@ -36,6 +41,9 @@ public class PlayerDaoImpl implements PlayerDao {
             statement.setString(4, player.getStatus().name());
             int rowsAffected = statement.executeUpdate();
             if (rowsAffected > 0) {
+                if (dbListener != null) {
+                    dbListener.onDataChanged(); // mona
+                }
                 var resultSet = statement.getGeneratedKeys();
                 if (resultSet.next()) {
                     return findById(resultSet.getInt(1)).orElseThrow();
@@ -103,7 +111,11 @@ public class PlayerDaoImpl implements PlayerDao {
             statement.setString(3, player.getAvatarUrl());
             statement.setString(4, player.getStatus().name());
             statement.setInt(5, player.getId());
-            return statement.executeUpdate() > 0;
+            boolean isUpdated = statement.executeUpdate() > 0;
+            if (isUpdated && dbListener != null) {
+                dbListener.onDataChanged();
+            }
+            return  isUpdated;
         } catch (SQLException e) {
             throw new RuntimeException("Error updating player", e);
         }
@@ -120,6 +132,22 @@ public class PlayerDaoImpl implements PlayerDao {
         }
     }
 
+    @Override
+    public int countByStatus(PlayerStatus status) {
+        String query = "SELECT COUNT(*) FROM users WHERE status = ?";
+        try(PreparedStatement statement = connection.prepareStatement(query);) {
+            statement.setString(1,status.name());
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error counting players by status: " + status, e);
+        }
+        return 0;
+    }
+
     private Player mapToPlayer(ResultSet resultSet) throws SQLException {
         Timestamp createdAtTs = resultSet.getTimestamp("created_at");
         Timestamp lastLoginTs = resultSet.getTimestamp("last_login");
@@ -133,4 +161,7 @@ public class PlayerDaoImpl implements PlayerDao {
                 lastLoginTs != null ? lastLoginTs.toLocalDateTime() : null
         );
     }
+
+
+
 }

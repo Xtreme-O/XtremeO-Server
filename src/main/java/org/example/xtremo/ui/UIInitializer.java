@@ -1,5 +1,7 @@
 package org.example.xtremo.ui;
 
+import org.example.xtremo.model.enums.PlayerStatus;
+import org.example.xtremo.service.statistics.StateService;
 import org.example.xtremo.ui.table.TableManager;
 import java.time.LocalDateTime;
 import javafx.application.Platform;
@@ -25,6 +27,7 @@ public class UIInitializer {
     private final AnimationManager animationManager;
     private final ChartManager chartManager;
     private final TableManager tableManager;
+    private final StateService statsService;
 
     public UIInitializer(
             Button stopBtn,
@@ -34,9 +37,13 @@ public class UIInitializer {
         this.animationManager = new AnimationManager(stopBtn);
         this.chartManager = new ChartManager(chart);
         this.tableManager = new TableManager(matchesTable);
+        this.statsService = new StateService();
     }
 
     public void initialize() {
+
+        statsService.listenToUpdates(this::loadChartDataAsync);
+
         Platform.runLater(() -> {
             animationManager.initializeAnimations();
             LoggerManager.getInstance().error("Animations initialized");
@@ -51,12 +58,17 @@ public class UIInitializer {
 
     private void loadChartDataAsync() {
         new Thread(() -> {
+
+            int online = statsService.getCount(PlayerStatus.ONLINE);
+            int offline = statsService.getCount(PlayerStatus.OFFLINE);
+            int inGame = statsService.getCount(PlayerStatus.INGAME);
+
             LoggerManager.getInstance().success("Loading chart data...");
 
             List<XYChart.Data<String, Number>> chartData = new ArrayList<>();
-            chartData.add(new XYChart.Data<>("Online", 40));
-            chartData.add(new XYChart.Data<>("Offline", 30));
-            chartData.add(new XYChart.Data<>("In-Game", 20));
+            chartData.add(new XYChart.Data<>("Online", online));
+            chartData.add(new XYChart.Data<>("Offline", offline));
+            chartData.add(new XYChart.Data<>("In-Game", inGame));
 
             Platform.runLater(() -> {
                 chartManager.setupChart(FXCollections.observableArrayList(chartData));
