@@ -29,4 +29,8 @@ public class SessionManager {
         playerToSession.remove(session.getPlayer1().getPlayerId());
         playerToSession.remove(session.getPlayer2().getPlayerId());
     }
+    
+    public int getSessionsCount(){
+        return sessions.size();
+    }
 }
