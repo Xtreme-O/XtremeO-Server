@@ -2,23 +2,14 @@ package org.example.xtremo.network;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
-import java.sql.SQLException;
-import org.example.xtremo.custom_exceptions.CustomException;
-import org.example.xtremo.network.protocol.Action;
-import org.example.xtremo.network.protocol.ProtocolMessageEnvelope;
-import org.example.xtremo.network.protocol.RequestHeader;
-import org.example.xtremo.network.protocol.models.ErrorBody;
+import static org.example.xtremo.network.Server.logger;
+import org.example.xtremo.session.Session;
 
 /**
  *
@@ -27,73 +18,75 @@ import org.example.xtremo.network.protocol.models.ErrorBody;
 public class PlayerConnectionHandler implements Runnable {
 
     private final Socket socket;
-    private DataInputStream dis;
-    private DataOutputStream dos;
+    private final DataInputStream dis;
+    private final DataOutputStream dos;
+
+    private int playerId = -1;
+
+    public PlayerConnectionHandler(Socket socket) throws IOException {
+        this.socket = socket;
+        this.dis = new DataInputStream(socket.getInputStream());
+        this.dos = new DataOutputStream(socket.getOutputStream());
+    }
 
     public Socket getSocket() {
         return socket;
-    }
-
-    public DataInputStream getDis() {
-        return dis;
     }
 
     public DataOutputStream getDos() {
         return dos;
     }
 
-    public PlayerConnectionHandler(Socket socket) {
-        this.socket = socket;
-        try {
-            dos = new DataOutputStream(socket.getOutputStream());
-            dis = new DataInputStream(socket.getInputStream());
-        } catch (IOException ex) {
-            System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, "PlayerConnectionHandler " + ex);
-        }
+    public int getPlayerId() {
+        return playerId;
+    }
+
+    public void setPlayerId(int playerId) {
+        this.playerId = playerId;
+        Server.activePlayers.put(playerId, this);
     }
 
     @Override
     public void run() {
         try {
-            socket.setTcpNoDelay(true);
-            socket.setKeepAlive(true);
-            socket.setSoTimeout(0);
-
             while (!socket.isClosed()) {
-                String message;
-                try {
-                    message = dis.readUTF();
-                    dos.flush();
-                } catch (EOFException eof) {
-                    System.getLogger(PlayerConnectionHandler.class.getName())
-                            .log(System.Logger.Level.INFO, "Client disconnected (EOF): {0}", socket.getRemoteSocketAddress());
-                    break;
-                } catch (SocketException se) {
-                    System.getLogger(PlayerConnectionHandler.class.getName())
-                            .log(System.Logger.Level.WARNING, "Socket exception: {0}", se.getMessage());
-                    break;
-                }
-                JsonObject root = JsonParser.parseString(message).getAsJsonObject();
-                System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.INFO, message);
+                String msg = dis.readUTF();
+                JsonObject root = JsonParser.parseString(msg).getAsJsonObject();
                 PlayerNetworkOperations.handleClientActionRequest(root, this);
             }
+        } catch (EOFException | SocketException e) {
+            handleDisconnect();
+        } catch (Exception e) {
+            logger.error("Server error: " + e.getMessage());
+            handleDisconnect();
+        }
+    }
 
-        } catch (IOException | SQLException e) {
-            System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, e);
-        } catch (CustomException.InviteError inviteError) {
-            try {
-                System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) "User not active right now.");
+    public void forceDisconnect() {
+        logger.info("Force disconnect initiated for playerId=" + playerId);
+        handleDisconnect();
+    }
 
-                RequestHeader header = new RequestHeader("JSON", Action.INVITE_CONFIRMED.name());
-                ErrorBody errorBody = new ErrorBody(inviteError.getMessage());
-                ProtocolMessageEnvelope<ErrorBody> message = new ProtocolMessageEnvelope<ErrorBody>(header, errorBody);
-                PlayerNetworkOperations.sendResponse(message, dos);
-                
-            } catch (IOException ex1) {
-                System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex1);
+    private void handleDisconnect() {
+        if (playerId != -1) {
+            logger.info("Disconnecting playerId=" + playerId);
+            Server.activePlayers.remove(playerId);
+            Session session = Server.sessionManager.getByPlayer(playerId);
+            if (session != null) {
+                logger.info("Removing session for playerId=" + playerId);
+                session.onPlayerDisconnected(playerId);
+                Server.sessionManager.remove(session);
+            } else {
+                logger.warn("No active session found for playerId=" + playerId);
             }
-        } catch (Exception ex) {
-            System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }
+        try {
+            if (!socket.isClosed()) {
+                socket.close();
+                logger.info("Socket closed for playerId=" + playerId);
+            }
+        } catch (IOException e) {
+            logger.error("Error closing socket for playerId=" + playerId + ": " + e.getMessage());
         }
     }
 }
