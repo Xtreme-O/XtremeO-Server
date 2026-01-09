@@ -26,6 +26,12 @@ public abstract class CustomException{
             super(message);
         }
     }
+    public static class InviteDeclined extends Exception{
+        
+        public InviteDeclined(String message) {
+            super(message);
+        }
+    }
     
     
 }
