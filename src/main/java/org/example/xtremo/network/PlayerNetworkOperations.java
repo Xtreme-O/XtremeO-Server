@@ -8,12 +8,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.Socket;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import org.example.xtremo.custom_exceptions.CustomException;
 import org.example.xtremo.handlers.AuthenticationHandler;
@@ -26,11 +22,13 @@ import org.example.xtremo.network.protocol.ActionTypeMapper;
 import org.example.xtremo.network.protocol.ProtocolMessageEnvelope;
 import org.example.xtremo.network.protocol.RequestHeader;
 import org.example.xtremo.network.protocol.models.InviteBody;
+import org.example.xtremo.network.protocol.models.InviteConfirmedBody;
 import org.example.xtremo.network.protocol.models.LoginBody;
 import org.example.xtremo.network.protocol.models.LogoutBody;
 import org.example.xtremo.network.protocol.models.RegisterBody;
 import org.example.xtremo.session.SessionPlayer;
 import org.example.xtremo.service.AuthService;
+import org.example.xtremo.session.Session;
 import org.example.xtremo.utils.DateTimeGsonAdapter;
 import org.example.xtremo.utils.RequestHeaderAdapter;
 
@@ -44,7 +42,7 @@ public class PlayerNetworkOperations {
         throw new IllegalAccessError();
     }
 
-    private static Gson gsonConverter = new GsonBuilder()
+    private static final Gson gsonConverter = new GsonBuilder()
             .setPrettyPrinting()
             .registerTypeAdapter(RequestHeader.class, new RequestHeaderAdapter())
             .registerTypeAdapter(LocalDateTime.class, new DateTimeGsonAdapter())
@@ -56,12 +54,11 @@ public class PlayerNetworkOperations {
 
     public static void sendResponse(ProtocolMessageEnvelope message, DataOutputStream out) throws IOException {
         String responseString = PlayerNetworkOperations.gsonConverter.toJson(message);
-        int length = responseString.length();
-        out.write(length);
+//        System.getLogger(PlayerNetworkOperations.class.getName()).log(System.Logger.Level.WARNING, (String) responseString);
         out.writeUTF(responseString);
     }
 
-    public static void handleClientActionRequest(JsonObject rootJsonObject, PlayerConnectionHandler client) throws SQLException, Exception {
+    public static void handleClientActionRequest(JsonObject rootJsonObject, PlayerConnectionHandler client) throws Exception {
         AuthService authService = AuthService.getAuthService();
         String action = rootJsonObject
                 .getAsJsonObject("header")
@@ -78,6 +75,7 @@ public class PlayerNetworkOperations {
                     ProtocolMessageEnvelope<PlayerDTO> response = new ProtocolMessageEnvelope<>(new RequestHeader("JSON", "RESPONSE"), pdto);
                     Server.activePlayers.put(pdto.id(), client);
                     PlayerNetworkOperations.sendResponse(response, client.getDos());
+                    Server.logger.info(Action.LOGIN.name() + pdto);
 
                 } catch (Exception ex) {
                     System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
@@ -116,11 +114,11 @@ public class PlayerNetworkOperations {
                 ProtocolMessageEnvelope<InviteBody> req = gsonConverter.fromJson(rootJsonObject, new TypeToken<ProtocolMessageEnvelope<InviteBody>>() {
                 }.getType());
                 System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) gsonConverter.toJson(req));
-                
+
                 PlayerDTO reciver = req.getBody().getPlayer2();
-                PlayerDTO sender = req.getBody().getPlayer1();
                 PlayerConnectionHandler reciverHandler = Server.activePlayers.getOrDefault(reciver.id(), null);
                 if (reciverHandler == null) {
+                    System.getLogger(PlayerNetworkOperations.class.getName()).log(System.Logger.Level.ERROR, (String) "User not active right now reciverHandler == null.");
                     throw new CustomException.InviteError("User not active right now.");
                 }
                 try {
@@ -130,11 +128,30 @@ public class PlayerNetworkOperations {
                 }
 
             }
-            case CONFIRM_INVITE -> {
-                
-                
-                
-                
+            case INVITE_CONFIRMED -> {
+                ProtocolMessageEnvelope<InviteConfirmedBody> req = gsonConverter.fromJson(rootJsonObject, new TypeToken<ProtocolMessageEnvelope<InviteConfirmedBody>>() {
+                }.getType());
+                System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) gsonConverter.toJson(req));
+
+                InviteConfirmedBody body = req.getBody();
+                int senderId = body.getSenderId();
+                int recieverId = body.getRecieverId();
+
+                PlayerConnectionHandler senderPlayerHandler = Server.activePlayers.getOrDefault(senderId, null);
+                PlayerConnectionHandler recieverPlayerHandler = Server.activePlayers.getOrDefault(recieverId, null);
+
+                if (senderPlayerHandler != null && recieverPlayerHandler != null) {
+                    SessionPlayer player1 = new SessionPlayer(senderPlayerHandler);
+                    SessionPlayer player2 = new SessionPlayer(recieverPlayerHandler);
+
+                    String sessionKey = String.valueOf(senderId) + recieverId;
+                    Session session = new Session(sessionKey, player1, player2);
+                    Server.activeSession.put(sessionKey, session);
+                }
+
+            }
+            case INVITE_DECLIENED -> {
+
             }
 
             default -> {
