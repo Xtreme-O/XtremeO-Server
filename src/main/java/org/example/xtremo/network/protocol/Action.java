@@ -22,5 +22,6 @@ public enum Action {
     ERROR,
     UNKNOWN,
     INVITE,
-    CONFIRM_INVITE,
+    INVITE_CONFIRMED,
+    INVITE_DECLIENED,
 }

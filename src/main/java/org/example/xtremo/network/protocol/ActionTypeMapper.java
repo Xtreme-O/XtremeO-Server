@@ -27,7 +27,8 @@ public class ActionTypeMapper {
             case "LOGOUT"           -> Action.LOGOUT;
             case "UNKNOWN"          -> Action.UNKNOWN;
             case "INVITE"           -> Action.INVITE;
-            case "CONFIRM_INVITE"   -> Action.CONFIRM_INVITE;
+            case "CONFIRM_INVITE"   -> Action.INVITE_CONFIRMED;
+            case "INVITE_DECLIENED" -> Action.INVITE_DECLIENED;
             default                 -> Action.UNKNOWN;
         };
         
