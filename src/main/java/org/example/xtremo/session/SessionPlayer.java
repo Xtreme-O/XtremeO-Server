@@ -11,25 +11,15 @@ import org.example.xtremo.network.PlayerConnectionHandler;
  * @author wahid
  */
 public class SessionPlayer {
-    private int id;
     private PlayerConnectionHandler handler;
 
     public SessionPlayer() {
     }
 
-    public SessionPlayer(int id, PlayerConnectionHandler handler) {
-        this.id = id;
+    public SessionPlayer(PlayerConnectionHandler handler) {
+
         this.handler = handler;
     }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public PlayerConnectionHandler getHandler() {
         return handler;
     }

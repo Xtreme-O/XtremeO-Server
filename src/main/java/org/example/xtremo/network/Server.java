@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.example.xtremo.logging.LoggerManager;
+import org.example.xtremo.session.Session;
 
 public class Server implements Runnable {
 
@@ -16,6 +18,8 @@ public class Server implements Runnable {
 //    int serverPort = Integer.parseInt(ConfigLoader.getProperty("server_port"));
     
     public static Map<Integer,PlayerConnectionHandler> activePlayers = new HashMap<>();
+    public static Map<String,Session> activeSession = new HashMap<>();
+    public static LoggerManager logger = LoggerManager.getInstance();
 
     private final ExecutorService clientPool = Executors.newFixedThreadPool(50);
 

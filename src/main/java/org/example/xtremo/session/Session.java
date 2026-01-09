@@ -5,6 +5,7 @@
 package org.example.xtremo.session;
 
 import java.io.IOException;
+import org.example.xtremo.network.PlayerConnectionHandler;
 import org.example.xtremo.network.PlayerNetworkOperations;
 import org.example.xtremo.network.protocol.ProtocolMessageEnvelope;
 
@@ -14,20 +15,20 @@ import org.example.xtremo.network.protocol.ProtocolMessageEnvelope;
  */
 public class Session {
 
-    private int id;
+    private String id;
     private SessionPlayer sessionPlayer1;
     private SessionPlayer sessionPlayer2;
 
-    public Session(int id, SessionPlayer sessionPlayer1, SessionPlayer sessionPlayer2) {
+    public Session(String id, SessionPlayer sessionPlayer1, SessionPlayer sessionPlayer2) {
         this.id = id;
         this.sessionPlayer1 = sessionPlayer1;
         this.sessionPlayer2 = sessionPlayer2;
     }
 
-    public void sendMessage(ProtocolMessageEnvelope message, int senderId) throws IOException {
-        if (senderId == sessionPlayer1.getId()) {
+    public void sendMessage(ProtocolMessageEnvelope message, PlayerConnectionHandler handler) throws IOException {
+        if (handler == sessionPlayer1.getHandler()) {
             PlayerNetworkOperations.sendResponse(message, sessionPlayer2.getHandler().getDos());
-        } else if (senderId == sessionPlayer2.getId()) {
+        } else if (handler == sessionPlayer2.getHandler()) {
             PlayerNetworkOperations.sendResponse(message, sessionPlayer1.getHandler().getDos());
         }
     }
@@ -35,11 +36,11 @@ public class Session {
     public Session() {
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
