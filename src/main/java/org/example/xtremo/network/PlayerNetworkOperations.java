@@ -15,9 +15,6 @@ import org.example.xtremo.custom_exceptions.CustomException;
 import org.example.xtremo.handlers.AuthenticationHandler;
 import org.example.xtremo.model.dto.PlayerDTO;
 import org.example.xtremo.network.protocol.Action;
-import static org.example.xtremo.network.protocol.Action.LOGIN;
-import static org.example.xtremo.network.protocol.Action.LOGOUT;
-import static org.example.xtremo.network.protocol.Action.REGISTER;
 import org.example.xtremo.network.protocol.ActionTypeMapper;
 import org.example.xtremo.network.protocol.ProtocolMessageEnvelope;
 import org.example.xtremo.network.protocol.RequestHeader;
@@ -26,6 +23,7 @@ import org.example.xtremo.network.protocol.models.InviteConfirmedBody;
 import org.example.xtremo.network.protocol.models.LoginBody;
 import org.example.xtremo.network.protocol.models.LogoutBody;
 import org.example.xtremo.network.protocol.models.RegisterBody;
+import org.example.xtremo.network.protocol.models.SessionMessageBody;
 import org.example.xtremo.session.SessionPlayer;
 import org.example.xtremo.service.AuthService;
 import org.example.xtremo.session.Session;
@@ -36,129 +34,140 @@ import org.example.xtremo.utils.RequestHeaderAdapter;
  *
  * @author wahid
  */
-public class PlayerNetworkOperations {
+public final class PlayerNetworkOperations {
 
     private PlayerNetworkOperations() {
         throw new IllegalAccessError();
     }
 
-    private static final Gson gsonConverter = new GsonBuilder()
+    private static final Gson gson = new GsonBuilder()
             .setPrettyPrinting()
             .registerTypeAdapter(RequestHeader.class, new RequestHeaderAdapter())
             .registerTypeAdapter(LocalDateTime.class, new DateTimeGsonAdapter())
             .create();
 
     public static Gson getGsonConverter() {
-        return PlayerNetworkOperations.gsonConverter;
+        return gson;
     }
 
-    public static void sendResponse(ProtocolMessageEnvelope message, DataOutputStream out) throws IOException {
-        String responseString = PlayerNetworkOperations.gsonConverter.toJson(message);
-//        System.getLogger(PlayerNetworkOperations.class.getName()).log(System.Logger.Level.WARNING, (String) responseString);
-        out.writeUTF(responseString);
+    public static void sendResponse(
+            ProtocolMessageEnvelope<?> message,
+            DataOutputStream out) throws IOException {
+        out.writeUTF(gson.toJson(message));
+        out.flush();
     }
 
-    public static void handleClientActionRequest(JsonObject rootJsonObject, PlayerConnectionHandler client) throws Exception {
-        AuthService authService = AuthService.getAuthService();
-        String action = rootJsonObject
-                .getAsJsonObject("header")
+    public static void handleClientActionRequest(
+            JsonObject root,
+            PlayerConnectionHandler client) throws Exception {
+
+        String actionStr = root.getAsJsonObject("header")
                 .get("action")
                 .getAsString();
 
-        Action actionType = ActionTypeMapper.getActionType(action);
-        switch (actionType) {
+        Action action = ActionTypeMapper.getActionType(actionStr);
+        AuthService authService = AuthService.getAuthService();
+
+        switch (action) {
+
             case LOGIN -> {
-                try {
-                    ProtocolMessageEnvelope<LoginBody> req = gsonConverter.fromJson(rootJsonObject, new TypeToken<ProtocolMessageEnvelope<LoginBody>>() {
-                    }.getType());
-                    PlayerDTO pdto = AuthenticationHandler.handleLogin(authService, req);
-                    ProtocolMessageEnvelope<PlayerDTO> response = new ProtocolMessageEnvelope<>(new RequestHeader("JSON", "RESPONSE"), pdto);
-                    Server.activePlayers.put(pdto.id(), client);
-                    PlayerNetworkOperations.sendResponse(response, client.getDos());
-                    Server.logger.info(Action.LOGIN.name() + pdto);
+                ProtocolMessageEnvelope<LoginBody> req = gson.fromJson(root,
+                        new TypeToken<ProtocolMessageEnvelope<LoginBody>>() {
+                        }.getType());
 
-                } catch (Exception ex) {
-                    System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-                }
+                PlayerDTO player = AuthenticationHandler.handleLogin(authService, req);
 
+                client.setPlayerId(player.id());
+
+                ProtocolMessageEnvelope<PlayerDTO> response = new ProtocolMessageEnvelope<>(
+                        new RequestHeader("JSON", "RESPONSE"),
+                        player);
+
+                sendResponse(response, client.getDos());
+                Server.logger.info("LOGIN success: " + player.id());
             }
-            case REGISTER -> {
-                try {
-                    ProtocolMessageEnvelope<RegisterBody> req = gsonConverter.fromJson(rootJsonObject, new TypeToken<ProtocolMessageEnvelope<RegisterBody>>() {
-                    }.getType());
-                    PlayerDTO pdto = AuthenticationHandler.handleRegister(authService, req);
-                    ProtocolMessageEnvelope<PlayerDTO> response = new ProtocolMessageEnvelope<>(new RequestHeader("JSON", "RESPONSE"), pdto);
-                    PlayerNetworkOperations.sendResponse(response, client.getDos());
-                } catch (Exception ex) {
-                    System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-                }
 
+            case REGISTER -> {
+                ProtocolMessageEnvelope<RegisterBody> req = gson.fromJson(root,
+                        new TypeToken<ProtocolMessageEnvelope<RegisterBody>>() {
+                        }.getType());
+
+                PlayerDTO player = AuthenticationHandler.handleRegister(authService, req);
+
+                ProtocolMessageEnvelope<PlayerDTO> response = new ProtocolMessageEnvelope<>(
+                        new RequestHeader("JSON", "RESPONSE"),
+                        player);
+
+                sendResponse(response, client.getDos());
             }
 
             case LOGOUT -> {
-                ProtocolMessageEnvelope<LogoutBody> req = gsonConverter.fromJson(rootJsonObject, new TypeToken<ProtocolMessageEnvelope<LogoutBody>>() {
-                }.getType());
-                boolean isUserLogedOut;
-                try {
-                    isUserLogedOut = AuthenticationHandler.handleLogout(authService, req);
+                ProtocolMessageEnvelope<LogoutBody> req = gson.fromJson(root,
+                        new TypeToken<ProtocolMessageEnvelope<LogoutBody>>() {
+                        }.getType());
 
-                    if (isUserLogedOut) {
-                        System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.INFO, (String) "User loged out");
-                    }
-                } catch (Exception ex) {
-                    System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-                }
+                AuthenticationHandler.handleLogout(authService, req);
 
+                client.forceDisconnect();
+                Server.logger.info("LOGOUT playerId=" + client.getPlayerId());
             }
+
             case INVITE -> {
-                ProtocolMessageEnvelope<InviteBody> req = gsonConverter.fromJson(rootJsonObject, new TypeToken<ProtocolMessageEnvelope<InviteBody>>() {
-                }.getType());
-                System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) gsonConverter.toJson(req));
+                ProtocolMessageEnvelope<InviteBody> req = gson.fromJson(root,
+                        new TypeToken<ProtocolMessageEnvelope<InviteBody>>() {
+                        }.getType());
 
-                PlayerDTO reciver = req.getBody().getPlayer2();
-                PlayerConnectionHandler reciverHandler = Server.activePlayers.getOrDefault(reciver.id(), null);
-                if (reciverHandler == null) {
-                    System.getLogger(PlayerNetworkOperations.class.getName()).log(System.Logger.Level.ERROR, (String) "User not active right now reciverHandler == null.");
-                    throw new CustomException.InviteError("User not active right now.");
-                }
-                try {
-                    PlayerNetworkOperations.sendResponse(req, reciverHandler.getDos());
-                } catch (IOException ex) {
-                    System.getLogger(PlayerNetworkOperations.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+                int receiverId = req.getBody().getPlayer2().id();
+                PlayerConnectionHandler receiver = Server.activePlayers.get(receiverId);
+
+                if (receiver == null) {
+                    throw new CustomException.InviteError("User not active");
                 }
 
+                sendResponse(req, receiver.getDos());
             }
+
             case INVITE_CONFIRMED -> {
-                ProtocolMessageEnvelope<InviteConfirmedBody> req = gsonConverter.fromJson(rootJsonObject, new TypeToken<ProtocolMessageEnvelope<InviteConfirmedBody>>() {
-                }.getType());
-                System.getLogger(PlayerConnectionHandler.class.getName()).log(System.Logger.Level.ERROR, (String) gsonConverter.toJson(req));
+                ProtocolMessageEnvelope<InviteConfirmedBody> req = gson.fromJson(root,
+                        new TypeToken<ProtocolMessageEnvelope<InviteConfirmedBody>>() {
+                        }.getType());
 
                 InviteConfirmedBody body = req.getBody();
                 int senderId = body.getSenderId();
-                int recieverId = body.getRecieverId();
+                int receiverId = body.getRecieverId();
 
-                PlayerConnectionHandler senderPlayerHandler = Server.activePlayers.getOrDefault(senderId, null);
-                PlayerConnectionHandler recieverPlayerHandler = Server.activePlayers.getOrDefault(recieverId, null);
+                PlayerConnectionHandler sender = Server.activePlayers.get(senderId);
+                PlayerConnectionHandler receiver = Server.activePlayers.get(receiverId);
 
-                if (senderPlayerHandler != null && recieverPlayerHandler != null) {
-                    SessionPlayer player1 = new SessionPlayer(senderPlayerHandler);
-                    SessionPlayer player2 = new SessionPlayer(recieverPlayerHandler);
+                if (sender == null || receiver == null) {
+                    throw new CustomException.InviteError("One of the players is offline");
+                }
+                SessionPlayer p1 = new SessionPlayer(senderId, sender);
+                SessionPlayer p2 = new SessionPlayer(receiverId, receiver);
 
-                    String sessionKey = String.valueOf(senderId) + recieverId;
-                    Session session = new Session(sessionKey, player1, player2);
-                    Server.activeSession.put(sessionKey, session);
+                String sessionId = senderId + "-" + receiverId;
+                Session session = new Session(sessionId, p1, p2);
+
+                Server.sessionManager.register(session);
+
+                Server.logger.info("Session created: " + sessionId);
+            }
+
+            case SESSION_MESSAGE -> {
+                ProtocolMessageEnvelope<SessionMessageBody> req = gson.fromJson(root, new TypeToken<ProtocolMessageEnvelope<SessionMessageBody>>() {
+                }.getType());
+                int playerId = client.getPlayerId();
+                Session session = Server.sessionManager.getByPlayer(playerId);
+
+                if (session == null) {
+                    throw new IllegalStateException("Player not in session");
                 }
 
-            }
-            case INVITE_DECLIENED -> {
-
+                session.forward(req, playerId);
             }
 
-            default -> {
-                throw new AssertionError();
-            }
-
+            default ->
+                throw new AssertionError("Unhandled action: " + action);
         }
     }
-
 }
