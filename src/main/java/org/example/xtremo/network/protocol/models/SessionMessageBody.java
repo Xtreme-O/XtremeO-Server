@@ -10,4 +10,14 @@ package org.example.xtremo.network.protocol.models;
  */
 public class SessionMessageBody {
     
+    private Move move;
+
+    public Move getMove() {
+        return move;
+    }
+
+    public SessionMessageBody() {
+    }
+    
+    
 }
