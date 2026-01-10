@@ -145,7 +145,7 @@ public class Session {
         }
     }
 
-    private SessionPlayer getOtherPlayer(int playerId) {
+    public SessionPlayer getOtherPlayer(int playerId) {
         if (player1.getPlayerId() == playerId) {
             return player2;
         } else if (player2.getPlayerId() == playerId) {

@@ -11,7 +11,17 @@ package org.example.xtremo.network.protocol.models;
 public class SessionMessageBody {
     
     private Move move;
+    private GameState state;
 
+    public GameState getState() {
+        return state;
+    }
+
+    public SessionMessageBody(Move move, GameState state) {
+        this.move = move;
+        this.state = state;
+    }
+    
     public Move getMove() {
         return move;
     }

@@ -11,13 +11,23 @@ import com.google.gson.reflect.TypeToken;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Enumeration;
+import java.util.Optional;
 import org.example.xtremo.custom_exceptions.CustomException;
 import org.example.xtremo.handlers.AuthenticationHandler;
 import org.example.xtremo.model.dto.PlayerDTO;
+import org.example.xtremo.model.entity.Game;
+import org.example.xtremo.model.entity.Player;
+import org.example.xtremo.model.enums.GameResult;
+import org.example.xtremo.model.enums.GameType;
 import org.example.xtremo.network.protocol.Action;
+import static org.example.xtremo.network.protocol.Action.SESSION_MESSAGE;
 import org.example.xtremo.network.protocol.ActionTypeMapper;
 import org.example.xtremo.network.protocol.ProtocolMessageEnvelope;
 import org.example.xtremo.network.protocol.RequestHeader;
+import org.example.xtremo.network.protocol.models.GameState;
+import static org.example.xtremo.network.protocol.models.GameState.WIN;
+import org.example.xtremo.network.protocol.models.GetActivePlayersBody;
 import org.example.xtremo.network.protocol.models.InviteBody;
 import org.example.xtremo.network.protocol.models.InviteConfirmedBody;
 import org.example.xtremo.network.protocol.models.LoginBody;
@@ -26,6 +36,8 @@ import org.example.xtremo.network.protocol.models.RegisterBody;
 import org.example.xtremo.network.protocol.models.SessionMessageBody;
 import org.example.xtremo.session.SessionPlayer;
 import org.example.xtremo.service.AuthService;
+import org.example.xtremo.service.GameService;
+import org.example.xtremo.service.PlayerService;
 import org.example.xtremo.session.Session;
 import org.example.xtremo.utils.DateTimeGsonAdapter;
 import org.example.xtremo.utils.RequestHeaderAdapter;
@@ -158,12 +170,57 @@ public final class PlayerNetworkOperations {
                 }.getType());
                 int playerId = client.getPlayerId();
                 Session session = Server.sessionManager.getByPlayer(playerId);
-
+                GameState gameState = req.getBody().getState();
                 if (session == null) {
                     throw new IllegalStateException("Player not in session");
                 }
+                GameService gameService = GameService.getGameService();
+
+                switch (gameState) {
+                    case WIN -> {
+
+                        Game game = new Game();
+                        game.setGameType(GameType.TIC_TAC_TOE);
+                        game.setPlayer1Id(client.getPlayerId());
+                        game.setPlayer2Id(session.getOtherPlayer(playerId).getPlayerId());
+                        game.setGameResult(GameResult.WIN);
+                        gameService.save(game);
+                    }
+                    case DRAW -> {
+                        Game game = new Game();
+                        game.setGameType(GameType.TIC_TAC_TOE);
+                        game.setPlayer1Id(client.getPlayerId());
+                        game.setPlayer2Id(session.getOtherPlayer(playerId).getPlayerId());
+                        game.setGameResult(GameResult.DRAW);
+                        gameService.save(game);
+                    }
+                    default ->
+                        throw new AssertionError();
+                }
 
                 session.forward(req, playerId);
+            }
+            case GET_ACTIVE_USERS -> {
+                PlayerService playerService = PlayerService.getPlayerService();
+
+                ProtocolMessageEnvelope<GetActivePlayersBody> response = new ProtocolMessageEnvelope<>();
+                response.header = new RequestHeader("JSON", Action.GET_ACTIVE_USERS.name());
+                GetActivePlayersBody body = new GetActivePlayersBody();
+
+                Enumeration<Integer> keys = Server.activePlayers.keys();
+
+                while (keys.hasMoreElements()) {
+                    Integer nextElement = keys.nextElement();
+                    Optional<Player> playerOption = playerService.findById(nextElement);
+
+                    if (playerOption.isPresent()) {
+                        Player player = playerOption.get();
+                        body.add(player.toPlayerDto());
+                    }
+
+                }
+                response.setBody(body);
+                sendResponse(response, client.getDos());
             }
 
             default ->
