@@ -4,30 +4,60 @@
  */
 package org.example.xtremo.session;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 /**
  *
  * @author wahid
  */
 public class SessionManager {
-
+    
+    private static SessionManager manager  = null;
+    private final ReentrantLock reentrantLock = new ReentrantLock();
+    private SessionManager(){
+    }
+    
+    public static SessionManager getManager(){
+        if (manager == null) {
+            manager = new SessionManager();
+        }
+        return manager;
+    }
+    
     private final ConcurrentHashMap<String, Session> sessions = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Integer, String> playerToSession = new ConcurrentHashMap<>();
 
     public void register(Session session) {
-        sessions.put(session.getId(), session);
-        playerToSession.put(session.getPlayer1().getPlayerId(), session.getId());
-        playerToSession.put(session.getPlayer2().getPlayerId(), session.getId());
+        reentrantLock.lock();
+        try {
+            sessions.put(session.getId(), session);
+            playerToSession.put(session.getPlayer1().getPlayerId(), session.getId());
+            playerToSession.put(session.getPlayer2().getPlayerId(), session.getId());
+        } finally {
+            reentrantLock.unlock();
+        }
     }
 
     public Session getByPlayer(int playerId) {
-        String sessionId = playerToSession.get(playerId);
-        return sessionId == null ? null : sessions.get(sessionId);
+        reentrantLock.lock();
+        try {
+            
+            String sessionId = playerToSession.get(playerId);
+            return sessionId == null ? null : sessions.get(sessionId);
+        } finally {
+            reentrantLock.unlock();
+        }
     }
 
     public void remove(Session session) {
-        sessions.remove(session.getId());
-        playerToSession.remove(session.getPlayer1().getPlayerId());
-        playerToSession.remove(session.getPlayer2().getPlayerId());
+        reentrantLock.lock();
+        try {
+            sessions.remove(session.getId());
+            playerToSession.remove(session.getPlayer1().getPlayerId());
+            playerToSession.remove(session.getPlayer2().getPlayerId());
+        } finally {
+            reentrantLock.unlock();
+        }
+        
     }
     
     public int getSessionsCount(){

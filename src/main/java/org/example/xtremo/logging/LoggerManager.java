@@ -18,6 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javafx.geometry.Bounds;
 
 import org.example.xtremo.utils.LogStyle;
 
@@ -116,6 +117,6 @@ public final class LoggerManager {
             logContainer.getChildren().remove(0);
         }
 
-        scrollPane.setVvalue(1.0);
+        scrollPane.setVvalue(1);
     }
 }

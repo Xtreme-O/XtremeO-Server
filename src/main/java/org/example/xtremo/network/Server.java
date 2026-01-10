@@ -17,7 +17,7 @@ public class Server implements Runnable {
     public static final ConcurrentHashMap<Integer, PlayerConnectionHandler> activePlayers =
             new ConcurrentHashMap<>();
 
-    public static final SessionManager sessionManager = new SessionManager();
+    public static final SessionManager sessionManager = SessionManager.getManager();
     public static final LoggerManager logger = LoggerManager.getInstance();
 
     private final ExecutorService clientPool = Executors.newFixedThreadPool(50);
