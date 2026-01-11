@@ -12,9 +12,7 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -26,8 +24,7 @@ public class DateTimeGsonAdapter implements JsonDeserializer<LocalDateTime>, Jso
 
     @Override
     public LocalDateTime deserialize(JsonElement json, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-        Instant instant = Instant.ofEpochMilli(json.getAsJsonPrimitive().getAsLong());
-        return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+            return LocalDateTime.parse(json.getAsString(), formatter);
     }
 
     @Override

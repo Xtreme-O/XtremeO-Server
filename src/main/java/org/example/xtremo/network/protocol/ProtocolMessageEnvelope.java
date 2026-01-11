@@ -25,6 +25,8 @@ public class ProtocolMessageEnvelope<T> {
         return body;
     }
     
+    public void setBody(T body){
+        this.body = body;
+    }
+    
 }
-
-

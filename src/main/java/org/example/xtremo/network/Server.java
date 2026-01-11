@@ -3,47 +3,47 @@ package org.example.xtremo.network;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
-import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.example.xtremo.logging.LoggerManager;
+import org.example.xtremo.session.SessionManager;
 
+public class Server implements Runnable {
 
-public class Server implements Runnable{
-    
-    ServerSocket server;
-    private volatile boolean running = false;
-//    int serverPort = Integer.parseInt(ConfigLoader.getProperty("server_port"));
-    public static Vector<PlayerConnectionHandler> players = new Vector<>();
-    
-    private ExecutorService clientPool = Executors.newFixedThreadPool(50);
-    
-    public void stop() throws IOException {
-        running = false;
-        server.close();
-        clientPool.shutdown();
-    }
-    
-    
-    public Server(){
-        running = true;
-    }
+    private ServerSocket serverSocket;
+    private volatile boolean running = true;
+
+    public static final ConcurrentHashMap<Integer, PlayerConnectionHandler> activePlayers =
+            new ConcurrentHashMap<>();
+
+    public static final SessionManager sessionManager = SessionManager.getManager();
+    public static final LoggerManager logger = LoggerManager.getInstance();
+
+    private final ExecutorService clientPool = Executors.newFixedThreadPool(50);
 
     @Override
     public void run() {
         try {
-            this.server = new ServerSocket(6666);
-            while(running){
-                Socket player = server.accept();
-                clientPool.submit(new PlayerConnectionHandler(player));
-                System.getLogger(Server.class.getName()).log(System.Logger.Level.WARNING,"New client has joined");
-//                System.out.println("New client has joined");
+            serverSocket = new ServerSocket(6666);
+            logger.info("Server started on port 6666");
+
+            while (running) {
+                Socket socket = serverSocket.accept();
+                PlayerConnectionHandler handler = new PlayerConnectionHandler(socket);
+                clientPool.submit(handler);
+                logger.info("New client connected: " + socket.getRemoteSocketAddress());
             }
-        }catch(SocketException e){
-            System.getLogger(Server.class.getName()).log(System.Logger.Level.WARNING, e.getLocalizedMessage());
+        } catch (IOException e) {
+            if (running) {
+                logger.error("Server error: "+ e.getMessage());
+            }
         }
-        catch (IOException e) {
-            System.getLogger(Server.class.getName()).log(System.Logger.Level.WARNING, e.getLocalizedMessage());
-        }
+    }
+
+    public void stop() throws IOException {
+        running = false;
+        serverSocket.close();
+        clientPool.shutdownNow();
     }
 }

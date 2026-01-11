@@ -18,6 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javafx.geometry.Bounds;
 
 import org.example.xtremo.utils.LogStyle;
 
@@ -32,8 +33,7 @@ public final class LoggerManager {
     private final Queue<Label> pendingLabels = new ConcurrentLinkedQueue<>();
     private final AtomicBoolean updateScheduled = new AtomicBoolean(false);
 
-    private final DateTimeFormatter formatter
-            = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     private LoggerManager() {
     }
@@ -43,7 +43,8 @@ public final class LoggerManager {
     }
 
     public void init(VBox box, ScrollPane pane) {
-        if (logContainer != null && pane != null) return;
+        if (logContainer != null && scrollPane != null)
+            return;
         synchronized (this) {
             if (logContainer != null && scrollPane != null) {
                 return;
@@ -79,8 +80,8 @@ public final class LoggerManager {
     private void log(String message, LogStyle style) {
         Label label = createLabel(message, style);
         pendingLabels.add(label);
-        
-        if (logContainer != null && 
+
+        if (logContainer != null &&
                 updateScheduled.compareAndSet(false, true)) {
             scheduleFlush();
         }
@@ -88,8 +89,7 @@ public final class LoggerManager {
 
     private Label createLabel(String message, LogStyle style) {
         Label label = new Label(
-                "[" + LocalTime.now().format(formatter) + "] " + message
-        );
+                "[" + LocalTime.now().format(formatter) + "] " + message);
         label.getStyleClass().add("terminal-log-line");
         if (style != null) {
             label.getStyleClass().add(style.getCssClass());
@@ -103,7 +103,7 @@ public final class LoggerManager {
 
     private void flushPendingLogs() {
         updateScheduled.set(false);
-        
+
         if (logContainer == null || scrollPane == null) {
             return;
         }
@@ -117,6 +117,6 @@ public final class LoggerManager {
             logContainer.getChildren().remove(0);
         }
 
-        scrollPane.setVvalue(1.0);
+        scrollPane.setVvalue(1);
     }
 }

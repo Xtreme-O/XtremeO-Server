@@ -22,14 +22,17 @@ import org.example.xtremo.utils.PasswordUtils;
 public class AuthService {
 
     private final PlayerDao playerDao;
+    private static final AuthService authService = null;
 
-    public AuthService(PlayerDao playerDao) {
-        this.playerDao = playerDao;
-    }
-
-    public AuthService() throws SQLException {
+    private AuthService() throws SQLException {
         playerDao = new PlayerDaoImpl();
-        
+    }
+    
+    public static AuthService getAuthService() throws SQLException{
+        if (authService != null) {
+            return authService;
+        }
+        return new AuthService();
     }
     
 
