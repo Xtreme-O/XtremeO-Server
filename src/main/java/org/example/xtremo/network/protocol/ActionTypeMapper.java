@@ -32,6 +32,7 @@ public class ActionTypeMapper {
             case "SESSION_ENDED"        -> Action.SESSION_ENDED;
             case "PARTNER_DISCONNECTED" -> Action.PARTNER_DISCONNECTED;
             case "SESSION_MESSAGE"      -> Action.SESSION_MESSAGE;
+            case "GET_ACTIVE_USERS"      -> Action.GET_ACTIVE_USERS;
             default                     -> Action.UNKNOWN;
         };
         

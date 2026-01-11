@@ -27,4 +27,5 @@ public enum Action {
     PARTNER_DISCONNECTED,
     SESSION_MESSAGE,
     SESSION_ENDED,
+    GET_ACTIVE_USERS,
 }

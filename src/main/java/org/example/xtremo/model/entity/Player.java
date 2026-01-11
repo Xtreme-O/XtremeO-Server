@@ -1,6 +1,7 @@
 package org.example.xtremo.model.entity;
 
 import java.time.LocalDateTime;
+import org.example.xtremo.model.dto.PlayerDTO;
 import org.example.xtremo.model.enums.PlayerStatus;
 
 public class Player {
@@ -12,6 +13,12 @@ public class Player {
     private PlayerStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime lastLogin;
+    
+    
+    
+    public PlayerDTO toPlayerDto(){
+        return new PlayerDTO(id, username, avatarUrl, status, createdAt, lastLogin);
+    }
 
     public Player() {
     }
