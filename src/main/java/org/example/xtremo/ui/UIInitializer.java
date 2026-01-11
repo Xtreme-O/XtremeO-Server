@@ -1,5 +1,6 @@
 package org.example.xtremo.ui;
 
+import java.sql.SQLException;
 import org.example.xtremo.model.enums.PlayerStatus;
 import org.example.xtremo.service.statistics.StateService;
 import org.example.xtremo.ui.table.TableManager;
@@ -33,7 +34,7 @@ public class UIInitializer {
             Button stopBtn,
             BarChart<String, Number> chart,
             TableView<GameDTO> matchesTable
-    ) {
+    ) throws SQLException {
         this.animationManager = new AnimationManager(stopBtn);
         this.chartManager = new ChartManager(chart);
         this.tableManager = new TableManager(matchesTable);

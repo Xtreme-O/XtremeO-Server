@@ -4,20 +4,18 @@ import org.example.xtremo.dao.PlayerDaoImpl;
 import org.example.xtremo.model.enums.PlayerStatus;
 import java.sql.SQLException;
 import org.example.xtremo.dao.PlayerDaoAnalyticsExtended;
+import org.example.xtremo.dao.PlayerDaoImplAnalyticsExtended;
 
 public class StateService {
     private PlayerDaoAnalyticsExtended playerDao;
 
-    public StateService() {
-        try {
-            this.playerDao = (PlayerDaoAnalyticsExtended) new PlayerDaoImpl(); //
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public StateService() throws SQLException {
+        
+        this.playerDao = new PlayerDaoImplAnalyticsExtended();
     }
-
+    
     public int getCount(PlayerStatus status) {
-        return playerDao.countByStatus(status); //
+        return playerDao.countByStatus(status);
     }
 
 //    public int getActiveConnectionsCount() {
@@ -25,6 +23,6 @@ public class StateService {
 //    }
 
     public void listenToUpdates(org.example.xtremo.dao.OnDatabaseChangeListener listener) {
-        PlayerDaoImpl.setOnDatabaseChangeListener(listener); //
+        PlayerDaoImpl.setOnDatabaseChangeListener(listener);
     }
 }

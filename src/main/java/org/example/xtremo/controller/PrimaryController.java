@@ -5,6 +5,7 @@
 package org.example.xtremo.controller;
 
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -65,7 +66,11 @@ public class PrimaryController implements Initializable {
 
         Platform.runLater(() -> {
             actionHandler = new ActionHandler();
-            uIInitializer = new UIInitializer(stopBtn, playerStatusChart, matchesTable);
+            try {
+                uIInitializer = new UIInitializer(stopBtn, playerStatusChart, matchesTable);
+            } catch (SQLException ex) {
+                System.getLogger(PrimaryController.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+            }
             uIInitializer.initialize();
             LoggerManager.getInstance().init(logContainer, terminalScroll);
             serviceControls = new ServiceControlsController(stopBtn, stopBtnIcon, restartBtn, restartBtnIcon, actionHandler);
