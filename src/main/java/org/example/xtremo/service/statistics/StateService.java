@@ -5,12 +5,14 @@ import org.example.xtremo.model.enums.PlayerStatus;
 import java.sql.SQLException;
 import org.example.xtremo.dao.PlayerDaoAnalyticsExtended;
 import org.example.xtremo.dao.PlayerDaoImplAnalyticsExtended;
+import org.example.xtremo.session.SessionManager;
 
 public class StateService {
     private PlayerDaoAnalyticsExtended playerDao;
+    private SessionManager sessionManager;
 
     public StateService() throws SQLException {
-        
+        this.sessionManager = SessionManager.getManager();
         this.playerDao = new PlayerDaoImplAnalyticsExtended();
     }
     
@@ -18,6 +20,9 @@ public class StateService {
         return playerDao.countByStatus(status);
     }
 
+    public int getActiveMatchesCount() {
+        return sessionManager.getSessionsCount();
+    }
 //    public int getActiveConnectionsCount() {
 //        return Server.players.size(); //
 //    }

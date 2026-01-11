@@ -59,7 +59,6 @@ public class PlayerService implements PlayerDao {
 
     @Override
     public List<Player> findAll() {
-
         return playerDaoImpl.findAll();
     }
 

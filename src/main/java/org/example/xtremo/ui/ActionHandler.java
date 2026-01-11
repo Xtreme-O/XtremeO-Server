@@ -2,7 +2,9 @@ package org.example.xtremo.ui;
 
 import javafx.event.ActionEvent;
 
-/** * 
+
+
+/** *
  * @author Abdelrahman
  */
 public class ActionHandler {
@@ -19,8 +21,8 @@ public class ActionHandler {
     public boolean isStopButtonActive() {
         return stopButtonActive;
     }
-    
-    public void handleRestartAction() {
+
+    public void handleRestartAction(){
         System.out.println("Restart action triggered");
     }
     

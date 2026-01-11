@@ -15,12 +15,15 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableView;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.text.Text;
 import org.controlsfx.control.ToggleSwitch;
 import javafx.scene.layout.VBox;
+import org.example.xtremo.controller.sub.ServerStatsMonitor;
 import org.example.xtremo.controller.sub.ServiceControlsController;
 import org.example.xtremo.controller.sub.TogglesController;
 import org.example.xtremo.logging.LoggerManager;
 import org.example.xtremo.model.dto.GameDTO;
+import org.example.xtremo.service.statistics.StateService;
 import org.example.xtremo.ui.ActionHandler;
 import org.example.xtremo.ui.UIInitializer;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -53,6 +56,11 @@ public class PrimaryController implements Initializable {
     private TableView<GameDTO> matchesTable;
 
     @FXML
+    private Text activePlayersText;
+    @FXML
+    private Text liveMatchesText;
+
+    @FXML
     private ScrollPane mainScrollPane;
 
     private ActionHandler actionHandler;
@@ -71,6 +79,14 @@ public class PrimaryController implements Initializable {
             } catch (SQLException ex) {
                 System.getLogger(PrimaryController.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
             }
+            StateService statsService = null;
+            try {
+                statsService = new StateService();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            ServerStatsMonitor monitor = new ServerStatsMonitor(statsService);
+            monitor.startMonitoring(activePlayersText, liveMatchesText);
             uIInitializer.initialize();
             LoggerManager.getInstance().init(logContainer, terminalScroll);
             serviceControls = new ServiceControlsController(stopBtn, stopBtnIcon, restartBtn, restartBtnIcon, actionHandler);

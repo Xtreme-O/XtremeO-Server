@@ -41,8 +41,10 @@ public class PlayerDaoImpl implements PlayerDao {
             statement.setString(4, player.getStatus().name());
             int rowsAffected = statement.executeUpdate();
             if (rowsAffected > 0) {
+                System.out.println("moon");
                 if (dbListener != null) {
                     dbListener.onDataChanged(); // mona
+                    System.out.println("monnaaa");
                 }
                 var resultSet = statement.getGeneratedKeys();
                 if (resultSet.next()) {

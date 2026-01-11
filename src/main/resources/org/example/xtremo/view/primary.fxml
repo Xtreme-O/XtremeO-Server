@@ -95,7 +95,7 @@
                         </VBox.margin>
                         <Text text="Active Players" styleClass="stat-label"/>
                         <HBox spacing="8" alignment="BASELINE_LEFT">
-                            <Text text="1,245" styleClass="stat-value"/>
+                            <Text fx:id="activePlayersText" text="0" styleClass="stat-value"/>
                         </HBox>
                         <ProgressBar progress="0.249" styleClass="stat-progress" maxWidth="Infinity">
                             <VBox.margin>
@@ -125,7 +125,7 @@
                         </VBox.margin>
                         <Text text="Live Matches" styleClass="stat-label"/>
                         <HBox spacing="8" alignment="BASELINE_LEFT">
-                            <Text text="84" styleClass="stat-value"/>
+                            <Text fx:id="liveMatchesText" text="0" styleClass="stat-value"/>
                             <Text text="games active" styleClass="stat-secondary"/>
                         </HBox>
                         <HBox spacing="6" alignment="CENTER_LEFT">

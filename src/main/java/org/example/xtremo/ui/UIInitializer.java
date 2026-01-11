@@ -1,6 +1,8 @@
 package org.example.xtremo.ui;
 
 import java.sql.SQLException;
+
+import javafx.scene.text.Text;
 import org.example.xtremo.model.enums.PlayerStatus;
 import org.example.xtremo.service.statistics.StateService;
 import org.example.xtremo.ui.table.TableManager;
@@ -64,6 +66,8 @@ public class UIInitializer {
             int offline = statsService.getCount(PlayerStatus.OFFLINE);
             int inGame = statsService.getCount(PlayerStatus.INGAME);
 
+            System.out.println(online);
+
             LoggerManager.getInstance().success("Loading chart data...");
 
             List<XYChart.Data<String, Number>> chartData = new ArrayList<>();
@@ -72,6 +76,7 @@ public class UIInitializer {
             chartData.add(new XYChart.Data<>("In-Game", inGame));
 
             Platform.runLater(() -> {
+
                 chartManager.setupChart(FXCollections.observableArrayList(chartData));
                 LoggerManager.getInstance().info("Chart data loaded successfully");
             });
