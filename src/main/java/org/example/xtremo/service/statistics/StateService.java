@@ -1,16 +1,16 @@
 package org.example.xtremo.service.statistics;
 
-import org.example.xtremo.dao.PlayerDao;
 import org.example.xtremo.dao.PlayerDaoImpl;
 import org.example.xtremo.model.enums.PlayerStatus;
 import java.sql.SQLException;
+import org.example.xtremo.dao.PlayerDaoAnalyticsExtended;
 
 public class StateService {
-    private PlayerDao playerDao;
+    private PlayerDaoAnalyticsExtended playerDao;
 
     public StateService() {
         try {
-            this.playerDao = new PlayerDaoImpl(); //
+            this.playerDao = (PlayerDaoAnalyticsExtended) new PlayerDaoImpl(); //
         } catch (SQLException e) {
             e.printStackTrace();
         }

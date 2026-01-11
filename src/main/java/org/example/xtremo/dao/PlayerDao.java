@@ -19,6 +19,4 @@ public interface PlayerDao {
     boolean update(Player player);
 
     boolean deleteById(int playerId);
-
-    int countByStatus(PlayerStatus status); // mona
 }

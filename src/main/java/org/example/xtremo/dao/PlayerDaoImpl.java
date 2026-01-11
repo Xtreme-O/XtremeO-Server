@@ -132,22 +132,6 @@ public class PlayerDaoImpl implements PlayerDao {
         }
     }
 
-    @Override
-    public int countByStatus(PlayerStatus status) {
-        String query = "SELECT COUNT(*) FROM users WHERE status = ?";
-        try(PreparedStatement statement = connection.prepareStatement(query);) {
-            statement.setString(1,status.name());
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return resultSet.getInt(1);
-                }
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Error counting players by status: " + status, e);
-        }
-        return 0;
-    }
-
     private Player mapToPlayer(ResultSet resultSet) throws SQLException {
         Timestamp createdAtTs = resultSet.getTimestamp("created_at");
         Timestamp lastLoginTs = resultSet.getTimestamp("last_login");
