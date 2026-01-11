@@ -21,7 +21,11 @@ public class ChartManager {
         series.setName("Player Status");
         series.setData(chartData);
 
-        Platform.runLater(() -> chart.getData().add(series));
+        Platform.runLater(() ->
+        {
+            chart.getData().clear();
+            chart.getData().add(series);
+        });
     }
 
 }

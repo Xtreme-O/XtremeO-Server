@@ -59,6 +59,7 @@ public class PrimaryController implements Initializable {
     private TogglesController togglesController;
     private UIInitializer uIInitializer;
 
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
 
