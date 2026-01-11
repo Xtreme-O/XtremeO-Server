@@ -1,6 +1,7 @@
 package org.example.xtremo.ui;
 
 import javafx.event.ActionEvent;
+import org.example.xtremo.logging.LoggerManager;
 
 /** * 
  * @author Abdelrahman
@@ -35,6 +36,12 @@ public class ActionHandler {
     
     public void handleChatToggle(boolean enabled) {
         // TODO: Implement chat toggle logic
+        StringBuilder bigMessage = new StringBuilder();
+        for (int i = 0; i < 20; i++) {
+            bigMessage.append("This is a very long test message segment #").append(i).append(" ");
+        }
+
+        LoggerManager.getInstance().success("Chat Toggled : " + bigMessage.toString());
         System.out.println("Chat " + (enabled ? "enabled" : "disabled"));
     }
     
