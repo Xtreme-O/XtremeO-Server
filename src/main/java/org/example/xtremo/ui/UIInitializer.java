@@ -3,7 +3,9 @@ package org.example.xtremo.ui;
 import java.sql.SQLException;
 
 import javafx.scene.text.Text;
+import org.example.xtremo.model.entity.Game;
 import org.example.xtremo.model.enums.PlayerStatus;
+import org.example.xtremo.service.GameService;
 import org.example.xtremo.service.statistics.StateService;
 import org.example.xtremo.ui.table.TableManager;
 import java.time.LocalDateTime;
@@ -85,41 +87,27 @@ public class UIInitializer {
 
     // ONLY DUMMY DATA
     private void loadTableDataAsync() {
-        new Thread(() -> {
-            LoggerManager.getInstance().warn("Loading table data...");
-
-            List<GameDTO> tableData = new ArrayList<>();
-            tableData.add(new GameDTO(
-                    1,
-                    GameType.TIC_TAC_TOE,
-                    101,
-                    102,
-                    101,
-                    GameResult.WIN,
-                    LocalDateTime.now().minusHours(2),
-                    LocalDateTime.now().minusHours(1).minusMinutes(45),
-                    true,
-                    "/records/game1.mp4"
-            ));
-
-            tableData.add(new GameDTO(
-                    2,
-                    GameType.TIC_TAC_TOE,
-                    103,
-                    104,
-                    null,
-                    GameResult.DRAW,
-                    LocalDateTime.now().minusDays(1).minusHours(3),
-                    LocalDateTime.now().minusDays(1).minusHours(2).minusMinutes(30),
-                    false,
-                    null
-            ));
-
+        try {
+            System.out.println("mona");
+            GameService gameService = GameService.getGameService();
+            List<GameDTO> tableData = new ArrayList<>(gameService.findAll().stream().map(Game::toGameDTO).toList());
             Platform.runLater(() -> {
+                System.out.println("monnnnna");
+
                 tableData.sort((a, b) -> Integer.compare(a.gameId(), b.gameId()));
                 tableManager.setData(tableData);
                 LoggerManager.getInstance().success("Table data loaded successfully");
             });
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        new Thread(() -> {
+            LoggerManager.getInstance().warn("Loading table data...");
+
+
+
+
         }).start();
     }
 }

@@ -1,6 +1,8 @@
 package org.example.xtremo.model.entity;
 
 import java.time.LocalDateTime;
+
+import org.example.xtremo.model.dto.GameDTO;
 import org.example.xtremo.model.enums.GameResult;
 import org.example.xtremo.model.enums.GameType;
 
@@ -36,6 +38,9 @@ public class Game {
     public Game() {
     }
 
+    public GameDTO toGameDTO(){
+        return  new GameDTO(gameId, gameType, player1Id, player2Id,winnerId,gameResult,startedAt,endedAt,isRecorded,recordFilePath);
+    }
     public int getGameId() {
         return gameId;
     }
