@@ -11,6 +11,20 @@ package org.example.xtremo.network.protocol.models;
 public class Move {
     private int row;
     private int col;
+    private MovePlayer player;
+
+    public MovePlayer getPlayer() {
+        return player;
+    }
+
+    public Move(int row, int col, MovePlayer player) {
+        this.row = row;
+        this.col = col;
+        this.player = player;
+    }
+
+    public Move() {
+    }
 
     public int getRow() {
         return row;

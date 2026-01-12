@@ -21,6 +21,7 @@ import org.example.xtremo.model.entity.Player;
 import org.example.xtremo.model.enums.GameResult;
 import org.example.xtremo.model.enums.GameType;
 import org.example.xtremo.network.protocol.Action;
+import static org.example.xtremo.network.protocol.Action.IN_GAME_MESSAGE;
 import static org.example.xtremo.network.protocol.Action.SESSION_MESSAGE;
 import org.example.xtremo.network.protocol.ActionTypeMapper;
 import org.example.xtremo.network.protocol.ProtocolMessageEnvelope;
@@ -28,12 +29,18 @@ import org.example.xtremo.network.protocol.RequestHeader;
 import org.example.xtremo.network.protocol.models.GameState;
 import static org.example.xtremo.network.protocol.models.GameState.WIN;
 import org.example.xtremo.network.protocol.models.GetActivePlayersBody;
+import org.example.xtremo.network.protocol.models.GlobalMessageBody;
+import org.example.xtremo.network.protocol.models.InGameMessageBody;
 import org.example.xtremo.network.protocol.models.InviteBody;
 import org.example.xtremo.network.protocol.models.InviteConfirmedBody;
+import org.example.xtremo.network.protocol.models.InviteConfirmedResponseBody;
+import org.example.xtremo.network.protocol.models.InviteDeclinedBody;
 import org.example.xtremo.network.protocol.models.LoginBody;
 import org.example.xtremo.network.protocol.models.LogoutBody;
+import org.example.xtremo.network.protocol.models.MovePlayer;
 import org.example.xtremo.network.protocol.models.RegisterBody;
 import org.example.xtremo.network.protocol.models.SessionMessageBody;
+import org.example.xtremo.network.protocol.models.Symbols;
 import org.example.xtremo.session.SessionPlayer;
 import org.example.xtremo.service.AuthService;
 import org.example.xtremo.service.GameService;
@@ -161,8 +168,28 @@ public final class PlayerNetworkOperations {
                 Session session = new Session(sessionId, p1, p2);
 
                 Server.sessionManager.register(session);
-
                 Server.logger.info("Session created: " + sessionId);
+
+                PlayerService playerService = PlayerService.getPlayerService();
+
+                RequestHeader header = new RequestHeader("JSON", Action.INVITE_CONFIRMED.name());
+                InviteConfirmedResponseBody responseBody = new InviteConfirmedResponseBody();
+                Optional<Player> senderPlayer = playerService.findById(senderId);
+                Optional<Player> receiverPlayer = playerService.findById(senderId);
+
+                if (senderPlayer.isPresent()) {
+                    Player p = senderPlayer.get();
+                    responseBody.setPlayer1(new MovePlayer(p.getUsername(), Symbols.X.name()));
+                }
+                if (receiverPlayer.isPresent()) {
+                    Player p = receiverPlayer.get();
+                    responseBody.setPlayer1(new MovePlayer(p.getUsername(), Symbols.O.name()));
+                }
+                
+                ProtocolMessageEnvelope<InviteConfirmedResponseBody> res = new ProtocolMessageEnvelope<>(header,responseBody);
+                session.forward(res, senderId);
+                session.forward(res, receiverId);
+                
             }
 
             case SESSION_MESSAGE -> {
@@ -178,7 +205,6 @@ public final class PlayerNetworkOperations {
 
                 switch (gameState) {
                     case WIN -> {
-
                         Game game = new Game();
                         game.setGameType(GameType.TIC_TAC_TOE);
                         game.setPlayer1Id(client.getPlayerId());
@@ -194,8 +220,8 @@ public final class PlayerNetworkOperations {
                         game.setGameResult(GameResult.DRAW);
                         gameService.save(game);
                     }
-                    default ->
-                        throw new AssertionError();
+                    default -> {
+                    }
                 }
 
                 session.forward(req, playerId);
@@ -221,6 +247,35 @@ public final class PlayerNetworkOperations {
                 }
                 response.setBody(body);
                 sendResponse(response, client.getDos());
+            }
+            case INVITE_DECLINED -> {
+                ProtocolMessageEnvelope<InviteDeclinedBody> req = gson.fromJson(root, new TypeToken<ProtocolMessageEnvelope<InviteDeclinedBody>>() {
+                }.getType());
+                int reciverId = req.getBody().getRecievrId();
+                PlayerConnectionHandler receiverHandler = Server.activePlayers.get(reciverId);
+                sendResponse(req, receiverHandler.getDos());
+            }
+            case IN_GAME_MESSAGE -> {
+                ProtocolMessageEnvelope<InGameMessageBody> req = gson.fromJson(root, new TypeToken<ProtocolMessageEnvelope<InGameMessageBody>>() {
+                }.getType());
+                int senderId = client.getPlayerId();
+                Session session = Server.sessionManager.getByPlayer(senderId);
+                session.forward(req, senderId);
+            }
+            case GLOBAL_MESSAGE -> {
+                ProtocolMessageEnvelope<GlobalMessageBody> req = gson.fromJson(root, new TypeToken<ProtocolMessageEnvelope<GlobalMessageBody>>() {
+                }.getType());
+
+                Server.activePlayers.forEachValue(1, e -> {
+                    if (e.getDos() != client.getDos()) {
+                        try {
+                            sendResponse(req, e.getDos());
+                        } catch (IOException ex) {
+                            Server.logger.error("Can't reach client " + client.getPlayerId());
+                        }
+                    }
+                });
+
             }
 
             default ->
