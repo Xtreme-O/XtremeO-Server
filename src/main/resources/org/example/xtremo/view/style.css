@@ -76,7 +76,7 @@
 .terminal-container { -fx-background-color: #1e1e1e; -fx-min-height: 280; }
 .terminal-header {
     -fx-background-color: #2a2a2a;
-    -fx-background-radius: 24 24 0 0;
+    -fx-background-radius: 16 16 0 0;
     -fx-border-color: transparent transparent rgba(255, 255, 255, 0.1) transparent;
     -fx-border-width: 0 0 1 0;
 }

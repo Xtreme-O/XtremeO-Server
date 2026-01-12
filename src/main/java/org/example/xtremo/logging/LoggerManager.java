@@ -1,7 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 /**
  *
  * @author Abdelrahman
@@ -18,7 +15,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javafx.geometry.Bounds;
 
 import org.example.xtremo.utils.LogStyle;
 
@@ -90,6 +86,8 @@ public final class LoggerManager {
     private Label createLabel(String message, LogStyle style) {
         Label label = new Label(
                 "[" + LocalTime.now().format(formatter) + "] " + message);
+        label.setWrapText(true);
+        label.setMaxWidth(Double.MAX_VALUE);
         label.getStyleClass().add("terminal-log-line");
         if (style != null) {
             label.getStyleClass().add(style.getCssClass());
@@ -114,9 +112,16 @@ public final class LoggerManager {
         }
 
         while (logContainer.getChildren().size() > MAX_LOG_ENTRIES) {
-            logContainer.getChildren().remove(0);
+            logContainer.getChildren().removeFirst();
         }
 
-        scrollPane.setVvalue(1);
+        logContainer.prefWidthProperty().bind(scrollPane.widthProperty().subtract(20));
+
+        Platform.runLater(() -> {
+            logContainer.applyCss();
+            logContainer.layout();
+            scrollPane.layout();
+            scrollPane.setVvalue(1.0);
+        });
     }
 }
