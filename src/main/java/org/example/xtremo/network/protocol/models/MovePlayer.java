@@ -23,6 +23,14 @@ public class MovePlayer {
         return symobl;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setSymobl(String symobl) {
+        this.symobl = symobl;
+    }
+
     public MovePlayer(String name, String symobl) {
         this.name = name;
         this.symobl = symobl;
