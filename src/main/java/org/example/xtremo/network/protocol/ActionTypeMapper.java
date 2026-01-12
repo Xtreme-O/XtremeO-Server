@@ -16,23 +16,20 @@ public class ActionTypeMapper {
        return switch (message.toUpperCase()) {
             case "LOGIN"                -> Action.LOGIN;
             case "REGISTER"             -> Action.REGISTER;
-            case "START"                -> Action.START;
-            case "WAITING"              -> Action.WAITING;
-            case "TURN"                 -> Action.TURN;
             case "MOVE"                 -> Action.MOVE;
             case "WIN"                  -> Action.WIN;
             case "DRAW"                 -> Action.DRAW;
-            case "EXIT"                 -> Action.EXIT;
             case "ERROR"                -> Action.ERROR;
             case "LOGOUT"               -> Action.LOGOUT;
             case "UNKNOWN"              -> Action.UNKNOWN;
             case "INVITE"               -> Action.INVITE;
             case "CONFIRM_INVITE"       -> Action.INVITE_CONFIRMED;
-            case "INVITE_DECLIENED"     -> Action.INVITE_DECLIENED;
             case "SESSION_ENDED"        -> Action.SESSION_ENDED;
             case "PARTNER_DISCONNECTED" -> Action.PARTNER_DISCONNECTED;
             case "SESSION_MESSAGE"      -> Action.SESSION_MESSAGE;
-            case "GET_ACTIVE_USERS"      -> Action.GET_ACTIVE_USERS;
+            case "GET_ACTIVE_USERS"     -> Action.GET_ACTIVE_USERS;
+            case "GLOBAL_MESSAGE"       -> Action.GLOBAL_MESSAGE;
+            case "IN_GAME_MESSAGE"      -> Action.IN_GAME_MESSAGE;
             default                     -> Action.UNKNOWN;
         };
         
