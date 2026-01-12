@@ -182,7 +182,6 @@ public final class PlayerNetworkOperations {
 
                 switch (gameState) {
                     case WIN -> {
-
                         Game game = new Game();
                         game.setGameType(GameType.TIC_TAC_TOE);
                         game.setPlayer1Id(client.getPlayerId());
@@ -198,8 +197,7 @@ public final class PlayerNetworkOperations {
                         game.setGameResult(GameResult.DRAW);
                         gameService.save(game);
                     }
-                    default ->
-                        throw new AssertionError();
+                    default -> {}
                 }
 
                 session.forward(req, playerId);
