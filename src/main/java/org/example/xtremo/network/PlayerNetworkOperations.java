@@ -10,12 +10,17 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.sql.SQLOutput;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Optional;
 import org.example.xtremo.custom_exceptions.CustomException;
 import org.example.xtremo.handlers.AuthenticationHandler;
+import org.example.xtremo.mapper.PlayerMapper;
 import org.example.xtremo.model.dto.PlayerDTO;
+import org.example.xtremo.model.dto.PlayerScoreDTO;
 import org.example.xtremo.model.entity.Game;
 import org.example.xtremo.model.entity.Player;
 import org.example.xtremo.model.enums.GameResult;
@@ -26,21 +31,11 @@ import static org.example.xtremo.network.protocol.Action.SESSION_MESSAGE;
 import org.example.xtremo.network.protocol.ActionTypeMapper;
 import org.example.xtremo.network.protocol.ProtocolMessageEnvelope;
 import org.example.xtremo.network.protocol.RequestHeader;
-import org.example.xtremo.network.protocol.models.GameState;
+import org.example.xtremo.network.protocol.models.*;
+
 import static org.example.xtremo.network.protocol.models.GameState.WIN;
-import org.example.xtremo.network.protocol.models.GetActivePlayersBody;
-import org.example.xtremo.network.protocol.models.GlobalMessageBody;
-import org.example.xtremo.network.protocol.models.InGameMessageBody;
-import org.example.xtremo.network.protocol.models.InviteBody;
-import org.example.xtremo.network.protocol.models.InviteConfirmedBody;
-import org.example.xtremo.network.protocol.models.InviteConfirmedResponseBody;
-import org.example.xtremo.network.protocol.models.InviteDeclinedBody;
-import org.example.xtremo.network.protocol.models.LoginBody;
-import org.example.xtremo.network.protocol.models.LogoutBody;
-import org.example.xtremo.network.protocol.models.MovePlayer;
-import org.example.xtremo.network.protocol.models.RegisterBody;
-import org.example.xtremo.network.protocol.models.SessionMessageBody;
-import org.example.xtremo.network.protocol.models.Symbols;
+
+import org.example.xtremo.service.ScoreService;
 import org.example.xtremo.session.SessionPlayer;
 import org.example.xtremo.service.AuthService;
 import org.example.xtremo.service.GameService;
@@ -202,23 +197,29 @@ public final class PlayerNetworkOperations {
                     throw new IllegalStateException("Player not in session");
                 }
                 GameService gameService = GameService.getGameService();
-
+                ScoreService score = ScoreService.getInstance();
                 switch (gameState) {
                     case WIN -> {
                         Game game = new Game();
                         game.setGameType(GameType.TIC_TAC_TOE);
                         game.setPlayer1Id(client.getPlayerId());
-                        game.setPlayer2Id(session.getOtherPlayer(playerId).getPlayerId());
+                        var otherPlayerId = session.getOtherPlayer(playerId).getPlayerId();
+                        game.setPlayer2Id(otherPlayerId);
                         game.setGameResult(GameResult.WIN);
                         gameService.save(game);
+                        score.updateGameResult(GameResult.WIN, GameType.TIC_TAC_TOE, client.getPlayerId());
+                        score.updateGameResult(GameResult.LOSS, GameType.TIC_TAC_TOE, otherPlayerId);
                     }
                     case DRAW -> {
                         Game game = new Game();
                         game.setGameType(GameType.TIC_TAC_TOE);
                         game.setPlayer1Id(client.getPlayerId());
-                        game.setPlayer2Id(session.getOtherPlayer(playerId).getPlayerId());
+                        var otherPlayerId = session.getOtherPlayer(playerId).getPlayerId();
+                        game.setPlayer2Id(otherPlayerId);
                         game.setGameResult(GameResult.DRAW);
                         gameService.save(game);
+                        score.updateGameResult(GameResult.DRAW, GameType.TIC_TAC_TOE, client.getPlayerId());
+                        score.updateGameResult(GameResult.DRAW, GameType.TIC_TAC_TOE, otherPlayerId);
                     }
                     default -> {
                     }
@@ -248,6 +249,26 @@ public final class PlayerNetworkOperations {
                 response.setBody(body);
                 sendResponse(response, client.getDos());
             }
+            case LOBBY -> {
+                PlayerService playerService = PlayerService.getPlayerService();
+                ScoreService scoreService = ScoreService.getInstance();
+
+                ProtocolMessageEnvelope<LobbyResponse> response = new ProtocolMessageEnvelope<>();
+                response.header = new RequestHeader("JSON", Action.LOBBY.name());
+                List<PlayerScoreDTO> players = new ArrayList<>();
+                Enumeration<Integer> keys = Server.activePlayers.keys();
+                while (keys.hasMoreElements()) {
+                    Integer nextElement = keys.nextElement();
+                    Optional<Player> playerOption = playerService.findById(nextElement);
+                    if(playerOption.isEmpty())
+                        continue;
+                    var playerWithScore = scoreService.getPlayerScore(playerOption.get().getId());
+                    players.add(playerWithScore);
+                }
+
+                response.setBody(new LobbyResponse(players,scoreService.getAllPlayerScores()));
+                sendResponse(response, client.getDos());
+            }
             case INVITE_DECLINED -> {
                 ProtocolMessageEnvelope<InviteDeclinedBody> req = gson.fromJson(root, new TypeToken<ProtocolMessageEnvelope<InviteDeclinedBody>>() {
                 }.getType());
@@ -275,11 +296,32 @@ public final class PlayerNetworkOperations {
                         }
                     }
                 });
-
             }
 
             default ->
                 throw new AssertionError("Unhandled action: " + action);
         }
+    }
+
+    public static void broadcastToOthers(int playerId , Action action) throws Exception {
+        Player player = PlayerService.getPlayerService()
+                .findById(playerId)
+                .orElseThrow();
+
+        ProtocolMessageEnvelope<PlayerDTO> response =
+                new ProtocolMessageEnvelope<>(
+                        new RequestHeader("JSON", action.name()),
+                        PlayerMapper.toDto(player)
+                );
+
+        Server.activePlayers.forEachValue(1, client -> {
+            if (client.getPlayerId() != playerId) {
+                try {
+                    sendResponse(response, client.getDos());
+                } catch (IOException e) {
+                    Server.logger.error("Can't reach client {}" + playerId +  e);
+                }
+            }
+        });
     }
 }

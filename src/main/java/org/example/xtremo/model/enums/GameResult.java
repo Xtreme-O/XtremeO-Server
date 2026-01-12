@@ -14,6 +14,7 @@ import java.util.Arrays;
 public enum GameResult {
     IN_PROGRESS,
     WIN,
+    LOSS,
     DRAW;
     
     public static GameResult fromString(String value) {

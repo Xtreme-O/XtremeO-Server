@@ -10,9 +10,9 @@ package org.example.xtremo.network.protocol;
  */
 public class ActionTypeMapper {
     private ActionTypeMapper(){}
-    
+
     public static Action getActionType(String message){
-        
+
        return switch (message.toUpperCase()) {
             case "LOGIN"                -> Action.LOGIN;
             case "REGISTER"             -> Action.REGISTER;
@@ -21,6 +21,7 @@ public class ActionTypeMapper {
             case "DRAW"                 -> Action.DRAW;
             case "ERROR"                -> Action.ERROR;
             case "LOGOUT"               -> Action.LOGOUT;
+            case "LOBBY"                ->  Action.LOBBY;
             case "UNKNOWN"              -> Action.UNKNOWN;
             case "INVITE"               -> Action.INVITE;
             case "CONFIRM_INVITE"       -> Action.INVITE_CONFIRMED;
@@ -32,9 +33,9 @@ public class ActionTypeMapper {
             case "IN_GAME_MESSAGE"      -> Action.IN_GAME_MESSAGE;
             default                     -> Action.UNKNOWN;
         };
-        
-        
-        
+
+
+
     }
-    
+
 }

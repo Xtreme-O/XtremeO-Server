@@ -9,6 +9,10 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
 import static org.example.xtremo.network.Server.logger;
+
+import org.example.xtremo.network.protocol.Action;
+import org.example.xtremo.service.AuthService;
+import org.example.xtremo.service.PlayerService;
 import org.example.xtremo.session.Session;
 
 /**
@@ -53,6 +57,7 @@ public class PlayerConnectionHandler implements Runnable {
                 String msg = dis.readUTF();
                 JsonObject root = JsonParser.parseString(msg).getAsJsonObject();
                 PlayerNetworkOperations.handleClientActionRequest(root, this);
+                PlayerNetworkOperations.broadcastToOthers(playerId, Action.ACTIVE_PLAYER_CONNECTED);
             }
         } catch (EOFException | SocketException e) {
             handleDisconnect();
@@ -67,9 +72,10 @@ public class PlayerConnectionHandler implements Runnable {
         handleDisconnect();
     }
 
-    private void handleDisconnect() {
+    private void handleDisconnect(){
         if (playerId != -1) {
             logger.info("Disconnecting playerId=" + playerId);
+            broadcastWhenDisconnect();
             Server.activePlayers.remove(playerId);
             Session session = Server.sessionManager.getByPlayer(playerId);
             if (session != null) {
@@ -79,14 +85,41 @@ public class PlayerConnectionHandler implements Runnable {
             } else {
                 logger.warn("No active session found for playerId=" + playerId);
             }
+            logoutPlayer();
         }
         try {
+
             if (!socket.isClosed()) {
                 socket.close();
                 logger.info("Socket closed for playerId=" + playerId);
             }
         } catch (IOException e) {
             logger.error("Error closing socket for playerId=" + playerId + ": " + e.getMessage());
+        } catch (Exception e) {
+            logger.error("Error while broadcasting =" + playerId + ": " + e.getMessage());
+
         }
+    }
+
+    private void logoutPlayer() {
+        try {
+            PlayerService playerService = PlayerService.getPlayerService();
+            var player = playerService.findById(playerId);
+            if(player.isPresent()) {
+                AuthService service = AuthService.getAuthService();
+                service.logout(player.get().getUsername());
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void broadcastWhenDisconnect() {
+        try {
+            PlayerNetworkOperations.broadcastToOthers(playerId,Action.ACTIVE_PLAYER_DISCONNECTED);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
 }
