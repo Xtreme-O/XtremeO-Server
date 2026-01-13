@@ -29,4 +29,5 @@ public enum Action {
     ACTIVE_PLAYER_DISCONNECTED,
     ACTIVE_PLAYER_CONNECTED,
     LOBBY,
+    INVITE_ALL,
 }

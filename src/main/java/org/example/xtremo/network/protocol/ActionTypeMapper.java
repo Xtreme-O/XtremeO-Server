@@ -24,13 +24,14 @@ public class ActionTypeMapper {
             case "LOBBY"                ->  Action.LOBBY;
             case "UNKNOWN"              -> Action.UNKNOWN;
             case "INVITE"               -> Action.INVITE;
-            case "INVITE_CONFIRMED"       -> Action.INVITE_CONFIRMED;
+            case "INVITE_CONFIRMED"     -> Action.INVITE_CONFIRMED;
             case "SESSION_ENDED"        -> Action.SESSION_ENDED;
             case "PARTNER_DISCONNECTED" -> Action.PARTNER_DISCONNECTED;
             case "SESSION_MESSAGE"      -> Action.SESSION_MESSAGE;
             case "GET_ACTIVE_USERS"     -> Action.GET_ACTIVE_USERS;
             case "GLOBAL_MESSAGE"       -> Action.GLOBAL_MESSAGE;
             case "IN_GAME_MESSAGE"      -> Action.IN_GAME_MESSAGE;
+            case "INVITE_ALL"           -> Action.INVITE_ALL;
             default                     -> Action.UNKNOWN;
         };
 

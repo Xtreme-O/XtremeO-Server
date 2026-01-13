@@ -24,6 +24,7 @@ import org.example.xtremo.model.entity.Player;
 import org.example.xtremo.model.enums.GameResult;
 import org.example.xtremo.model.enums.GameType;
 import org.example.xtremo.network.protocol.Action;
+import static org.example.xtremo.network.protocol.Action.GLOBAL_MESSAGE;
 import org.example.xtremo.network.protocol.ActionTypeMapper;
 import org.example.xtremo.network.protocol.ProtocolMessageEnvelope;
 import org.example.xtremo.network.protocol.RequestHeader;
@@ -315,6 +316,9 @@ public final class PlayerNetworkOperations {
                         }
                     }
                 });
+            }
+            case INVITE_ALL -> {
+                broadcastToOthers(client.getPlayerId(), Action.INVITE);
             }
 
             default ->
