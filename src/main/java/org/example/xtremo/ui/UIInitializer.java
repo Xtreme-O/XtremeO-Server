@@ -2,13 +2,11 @@ package org.example.xtremo.ui;
 
 import java.sql.SQLException;
 
-import javafx.scene.text.Text;
 import org.example.xtremo.model.entity.Game;
 import org.example.xtremo.model.enums.PlayerStatus;
 import org.example.xtremo.service.GameService;
 import org.example.xtremo.service.statistics.StateService;
 import org.example.xtremo.ui.table.TableManager;
-import java.time.LocalDateTime;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.scene.chart.BarChart;
@@ -20,13 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.example.xtremo.logging.LoggerManager;
 import org.example.xtremo.model.dto.GameDTO;
-import org.example.xtremo.model.enums.GameResult;
-import org.example.xtremo.model.enums.GameType;
 
-/**
- * All data fetching happens here (dummy data for now, will replace with
- * service/DAO later).
- */
+
 public class UIInitializer {
 
     private final AnimationManager animationManager;
@@ -84,16 +77,11 @@ public class UIInitializer {
             });
         }).start();
     }
-
-    // ONLY DUMMY DATA
     private void loadTableDataAsync() {
         try {
-            System.out.println("mona");
             GameService gameService = GameService.getGameService();
             List<GameDTO> tableData = new ArrayList<>(gameService.findAll().stream().map(Game::toGameDTO).toList());
             Platform.runLater(() -> {
-                System.out.println("monnnnna");
-
                 tableData.sort((a, b) -> Integer.compare(a.gameId(), b.gameId()));
                 tableManager.setData(tableData);
                 LoggerManager.getInstance().success("Table data loaded successfully");
