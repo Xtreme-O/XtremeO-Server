@@ -11,36 +11,27 @@ import com.google.gson.reflect.TypeToken;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Optional;
 import org.example.xtremo.custom_exceptions.CustomException;
 import org.example.xtremo.handlers.AuthenticationHandler;
+import org.example.xtremo.mapper.PlayerMapper;
 import org.example.xtremo.model.dto.PlayerDTO;
+import org.example.xtremo.model.dto.PlayerScoreDTO;
 import org.example.xtremo.model.entity.Game;
 import org.example.xtremo.model.entity.Player;
 import org.example.xtremo.model.enums.GameResult;
 import org.example.xtremo.model.enums.GameType;
 import org.example.xtremo.network.protocol.Action;
-import static org.example.xtremo.network.protocol.Action.IN_GAME_MESSAGE;
-import static org.example.xtremo.network.protocol.Action.SESSION_MESSAGE;
 import org.example.xtremo.network.protocol.ActionTypeMapper;
 import org.example.xtremo.network.protocol.ProtocolMessageEnvelope;
 import org.example.xtremo.network.protocol.RequestHeader;
-import org.example.xtremo.network.protocol.models.GameState;
-import static org.example.xtremo.network.protocol.models.GameState.WIN;
-import org.example.xtremo.network.protocol.models.GetActivePlayersBody;
-import org.example.xtremo.network.protocol.models.GlobalMessageBody;
-import org.example.xtremo.network.protocol.models.InGameMessageBody;
-import org.example.xtremo.network.protocol.models.InviteBody;
-import org.example.xtremo.network.protocol.models.InviteConfirmedBody;
-import org.example.xtremo.network.protocol.models.InviteConfirmedResponseBody;
-import org.example.xtremo.network.protocol.models.InviteDeclinedBody;
-import org.example.xtremo.network.protocol.models.LoginBody;
-import org.example.xtremo.network.protocol.models.LogoutBody;
-import org.example.xtremo.network.protocol.models.MovePlayer;
-import org.example.xtremo.network.protocol.models.RegisterBody;
-import org.example.xtremo.network.protocol.models.SessionMessageBody;
-import org.example.xtremo.network.protocol.models.Symbols;
+import org.example.xtremo.network.protocol.models.*;
+
+
+import org.example.xtremo.service.ScoreService;
 import org.example.xtremo.session.SessionPlayer;
 import org.example.xtremo.service.AuthService;
 import org.example.xtremo.service.GameService;
@@ -76,7 +67,26 @@ public final class PlayerNetworkOperations {
         out.flush();
     }
 
-    public static void handleClientActionRequest(
+
+    public static void handleClientActionRequest(JsonObject root,
+                                           PlayerConnectionHandler client) throws IOException {
+        try {
+            handleClientAction(root, client);
+        }catch (Exception e) {
+            sendErrorResponse(e.getMessage(), client);
+        }
+    }
+
+    private static void sendErrorResponse(String error, PlayerConnectionHandler client)
+            throws IOException {
+        RequestHeader header = new RequestHeader("JSON", Action.ERROR.name());
+        ProtocolMessageEnvelope<ErrorBody> response = new ProtocolMessageEnvelope<>(header,
+                new ErrorBody(error));
+        sendResponse(response, client.getDos());
+    }
+
+
+    public static void handleClientAction(
             JsonObject root,
             PlayerConnectionHandler client) throws Exception {
 
@@ -96,11 +106,13 @@ public final class PlayerNetworkOperations {
 
                 PlayerDTO player = AuthenticationHandler.handleLogin(authService, req);
 
+                PlayerScoreDTO playerScoreDTO = ScoreService.getInstance().getPlayerScore(player.id());
+
                 client.setPlayerId(player.id());
 
-                ProtocolMessageEnvelope<PlayerDTO> response = new ProtocolMessageEnvelope<>(
-                        new RequestHeader("JSON", "RESPONSE"),
-                        player);
+                ProtocolMessageEnvelope<PlayerScoreDTO> response = new ProtocolMessageEnvelope<>(
+                        new RequestHeader("JSON", Action.LOGIN.name()),
+                        playerScoreDTO);
 
                 sendResponse(response, client.getDos());
                 Server.logger.info("LOGIN success: " + player.id());
@@ -113,9 +125,12 @@ public final class PlayerNetworkOperations {
 
                 PlayerDTO player = AuthenticationHandler.handleRegister(authService, req);
 
-                ProtocolMessageEnvelope<PlayerDTO> response = new ProtocolMessageEnvelope<>(
-                        new RequestHeader("JSON", "RESPONSE"),
-                        player);
+                PlayerScoreDTO playerScoreDTO = ScoreService.getInstance().getPlayerScore(player.id());
+
+
+                ProtocolMessageEnvelope<PlayerScoreDTO> response = new ProtocolMessageEnvelope<>(
+                        new RequestHeader("JSON",  Action.REGISTER.name()),
+                        playerScoreDTO);
 
                 sendResponse(response, client.getDos());
             }
@@ -202,23 +217,29 @@ public final class PlayerNetworkOperations {
                     throw new IllegalStateException("Player not in session");
                 }
                 GameService gameService = GameService.getGameService();
-
+                ScoreService score = ScoreService.getInstance();
                 switch (gameState) {
                     case WIN -> {
                         Game game = new Game();
                         game.setGameType(GameType.TIC_TAC_TOE);
                         game.setPlayer1Id(client.getPlayerId());
-                        game.setPlayer2Id(session.getOtherPlayer(playerId).getPlayerId());
+                        var otherPlayerId = session.getOtherPlayer(playerId).getPlayerId();
+                        game.setPlayer2Id(otherPlayerId);
                         game.setGameResult(GameResult.WIN);
                         gameService.save(game);
+                        score.updateGameResult(GameResult.WIN, GameType.TIC_TAC_TOE, client.getPlayerId());
+                        score.updateGameResult(GameResult.LOSS, GameType.TIC_TAC_TOE, otherPlayerId);
                     }
                     case DRAW -> {
                         Game game = new Game();
                         game.setGameType(GameType.TIC_TAC_TOE);
                         game.setPlayer1Id(client.getPlayerId());
-                        game.setPlayer2Id(session.getOtherPlayer(playerId).getPlayerId());
+                        var otherPlayerId = session.getOtherPlayer(playerId).getPlayerId();
+                        game.setPlayer2Id(otherPlayerId);
                         game.setGameResult(GameResult.DRAW);
                         gameService.save(game);
+                        score.updateGameResult(GameResult.DRAW, GameType.TIC_TAC_TOE, client.getPlayerId());
+                        score.updateGameResult(GameResult.DRAW, GameType.TIC_TAC_TOE, otherPlayerId);
                     }
                     default -> {
                     }
@@ -248,6 +269,26 @@ public final class PlayerNetworkOperations {
                 response.setBody(body);
                 sendResponse(response, client.getDos());
             }
+            case LOBBY -> {
+                PlayerService playerService = PlayerService.getPlayerService();
+                ScoreService scoreService = ScoreService.getInstance();
+
+                ProtocolMessageEnvelope<LobbyResponse> response = new ProtocolMessageEnvelope<>();
+                response.header = new RequestHeader("JSON", Action.LOBBY.name());
+                List<PlayerScoreDTO> players = new ArrayList<>();
+                Enumeration<Integer> keys = Server.activePlayers.keys();
+                while (keys.hasMoreElements()) {
+                    Integer nextElement = keys.nextElement();
+                    Optional<Player> playerOption = playerService.findById(nextElement);
+                    if(playerOption.isEmpty())
+                        continue;
+                    var playerWithScore = scoreService.getPlayerScore(playerOption.get().getId());
+                    players.add(playerWithScore);
+                }
+
+                response.setBody(new LobbyResponse(players,scoreService.getAllPlayerScores()));
+                sendResponse(response, client.getDos());
+            }
             case INVITE_DECLINED -> {
                 ProtocolMessageEnvelope<InviteDeclinedBody> req = gson.fromJson(root, new TypeToken<ProtocolMessageEnvelope<InviteDeclinedBody>>() {
                 }.getType());
@@ -275,11 +316,30 @@ public final class PlayerNetworkOperations {
                         }
                     }
                 });
-
             }
 
             default ->
                 throw new AssertionError("Unhandled action: " + action);
         }
+    }
+
+    public static void broadcastToOthers(int playerId , Action action) throws Exception {
+        PlayerScoreDTO player = ScoreService.getInstance().getPlayerScore(playerId);
+
+
+        ProtocolMessageEnvelope<PlayerScoreDTO> response =
+                new ProtocolMessageEnvelope<>(
+                        new RequestHeader("JSON", action.name()),
+                        player);
+
+        Server.activePlayers.forEachValue(1, client -> {
+            if (client.getPlayerId() != playerId) {
+                try {
+                    sendResponse(response, client.getDos());
+                } catch (IOException e) {
+                    Server.logger.error("Can't reach client {}" + playerId +  e);
+                }
+            }
+        });
     }
 }

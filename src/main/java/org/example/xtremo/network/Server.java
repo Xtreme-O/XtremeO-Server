@@ -42,6 +42,7 @@ public class Server implements Runnable {
     }
 
     public void stop() throws IOException {
+        Server.activePlayers.forEachValue(1, PlayerConnectionHandler::forceDisconnect);
         running = false;
         serverSocket.close();
         clientPool.shutdownNow();
