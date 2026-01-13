@@ -1,6 +1,7 @@
 package org.example.xtremo.dao;
 
 import org.example.xtremo.model.entity.PlayerScore;
+import org.example.xtremo.model.enums.GameType;
 
 import java.sql.Statement;
 import java.sql.PreparedStatement;
@@ -71,6 +72,26 @@ public class PlayerScoreDaoImpl implements PlayerScoreDao {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error finding user score with user id : " + userId, e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<PlayerScore> findByUserIdAndGameType(int userId , GameType gameType) {
+        String query = "SELECT * FROM user_scores WHERE user_id = ? AND game_type = ? ";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, userId);
+            statement.setString(2, gameType.name());
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return Optional.of(mapToUserScore(resultSet));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                    "Error finding user score for userId=" + userId + " and gameType=" + gameType,
+                    e
+            );
         }
         return Optional.empty();
     }

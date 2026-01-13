@@ -9,9 +9,14 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import org.example.xtremo.dao.PlayerDao;
 import org.example.xtremo.dao.PlayerDaoImpl;
+import org.example.xtremo.dao.PlayerScoreDao;
+import org.example.xtremo.dao.PlayerScoreDaoImpl;
+import org.example.xtremo.database.DBConnection;
 import org.example.xtremo.mapper.PlayerMapper;
 import org.example.xtremo.model.dto.PlayerDTO;
 import org.example.xtremo.model.entity.Player;
+import org.example.xtremo.model.entity.PlayerScore;
+import org.example.xtremo.model.enums.GameType;
 import org.example.xtremo.model.enums.PlayerStatus;
 import org.example.xtremo.utils.PasswordUtils;
 
@@ -22,10 +27,12 @@ import org.example.xtremo.utils.PasswordUtils;
 public class AuthService {
 
     private final PlayerDao playerDao;
+    private final PlayerScoreDao playerScoreDao;
     private static final AuthService authService = null;
 
     private AuthService() throws SQLException {
         playerDao = new PlayerDaoImpl();
+        playerScoreDao = new PlayerScoreDaoImpl(DBConnection.getConnection());
     }
     
     public static AuthService getAuthService() throws SQLException{
@@ -69,12 +76,22 @@ public class AuthService {
                 username,
                 passwordHash,
                 avatarUrl,
-                PlayerStatus.OFFLINE
+                PlayerStatus.ONLINE
         );
 
-        System.out.println("before save");
         Player savedPlayer = playerDao.save(player);
-        System.out.println("After save");
+
+        PlayerScore emptyScore = new PlayerScore(
+                0,
+                savedPlayer.getId(),
+                GameType.TIC_TAC_TOE.name(),
+                0,
+                0,
+                0,
+                0
+        );
+        playerScoreDao.save(emptyScore);
+
         return PlayerMapper.toDto(savedPlayer);
     }
 
