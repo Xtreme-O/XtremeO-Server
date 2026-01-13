@@ -124,6 +124,5 @@ public class PlayerConnectionHandler implements Runnable {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
 }
