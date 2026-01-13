@@ -28,7 +28,7 @@ public class App extends Application {
 
         stage.setOnCloseRequest(e -> {
             try {
-                server.stop();
+                server.shutdown();
             } catch (IOException ex) {
                 System.getLogger(App.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
             }
@@ -49,7 +49,7 @@ public class App extends Application {
 
     @Override
     public void stop() throws Exception {
-       server.stop();
+       server.shutdown();
     }
     
     

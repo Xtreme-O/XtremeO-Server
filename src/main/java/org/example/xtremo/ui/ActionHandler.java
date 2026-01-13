@@ -2,6 +2,8 @@ package org.example.xtremo.ui;
 
 import javafx.event.ActionEvent;
 import org.example.xtremo.logging.LoggerManager;
+import org.example.xtremo.network.Server;
+import static org.example.xtremo.network.Server.logger;
 
 
 
@@ -14,17 +16,23 @@ public class ActionHandler {
     
     public boolean handleStopAction() {
         stopButtonActive = !stopButtonActive;
-        System.out.println("Stop button toggled: " + (stopButtonActive ? "ACTIVE (Green)" : "INACTIVE (Red)"));
+        Server.stop();
+        logger.info("Server has been stopped, no additional clients can join right now");
         return stopButtonActive;
     }
     
  
     public boolean isStopButtonActive() {
+        if (!stopButtonActive) {
+            Server.start();
+            logger.info("Server has been started, additional clients can join now");
+
+        }
         return stopButtonActive;
     }
 
     public void handleRestartAction(){
-        System.out.println("Restart action triggered");
+       Server.restart();
     }
     
     public void handleSwitchToSecondary(ActionEvent event) {
