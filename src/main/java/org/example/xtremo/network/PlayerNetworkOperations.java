@@ -167,7 +167,7 @@ public final class PlayerNetworkOperations {
 
                 InviteConfirmedBody body = req.getBody();
                 int senderId = body.getSenderId();
-                int receiverId = body.getRecieverId();
+                int receiverId = body.getReceiverId();
 
                 PlayerConnectionHandler sender = Server.activePlayers.get(senderId);
                 PlayerConnectionHandler receiver = Server.activePlayers.get(receiverId);
@@ -197,9 +197,9 @@ public final class PlayerNetworkOperations {
                 }
                 if (receiverPlayer.isPresent()) {
                     Player p = receiverPlayer.get();
-                    responseBody.setPlayer1(new MovePlayer(p.getUsername(), Symbols.O.name()));
+                    responseBody.setPlayer2(new MovePlayer(p.getUsername(), Symbols.O.name()));
                 }
-                
+
                 ProtocolMessageEnvelope<InviteConfirmedResponseBody> res = new ProtocolMessageEnvelope<>(header,responseBody);
                 session.forward(res, senderId);
                 session.forward(res, receiverId);

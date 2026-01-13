@@ -68,7 +68,7 @@ public class Session {
         try {
             SessionState currentState = state.get();
 
-            if (currentState != SessionState.ACTIVE) {
+            if (currentState != SessionState.ACTIVE && currentState != SessionState.CREATED) {
                 throw new IllegalStateException("Cannot forward message - session state: " + currentState);
             }
 

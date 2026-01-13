@@ -82,8 +82,8 @@ public class ScoreService {
                 );
             }
         }
-        playerScoresDTO.sort(Comparator.comparing(PlayerScoreDTO::elo));
-        return playerScoresDTO.stream().limit(5).toList();
+        playerScoresDTO.sort(Comparator.comparing(PlayerScoreDTO::elo).reversed());
+        return playerScoresDTO.stream().toList();
     }
 
     private int calculateScore(PlayerScore score){

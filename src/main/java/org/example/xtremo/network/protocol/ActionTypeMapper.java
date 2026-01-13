@@ -24,7 +24,7 @@ public class ActionTypeMapper {
             case "LOBBY"                ->  Action.LOBBY;
             case "UNKNOWN"              -> Action.UNKNOWN;
             case "INVITE"               -> Action.INVITE;
-            case "CONFIRM_INVITE"       -> Action.INVITE_CONFIRMED;
+            case "INVITE_CONFIRMED"       -> Action.INVITE_CONFIRMED;
             case "SESSION_ENDED"        -> Action.SESSION_ENDED;
             case "PARTNER_DISCONNECTED" -> Action.PARTNER_DISCONNECTED;
             case "SESSION_MESSAGE"      -> Action.SESSION_MESSAGE;
