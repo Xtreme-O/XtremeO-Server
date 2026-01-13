@@ -53,11 +53,15 @@ public class PlayerConnectionHandler implements Runnable {
     @Override
     public void run() {
         try {
+            boolean isBroadCasted = false;
             while (!socket.isClosed()) {
                 String msg = dis.readUTF();
                 JsonObject root = JsonParser.parseString(msg).getAsJsonObject();
                 PlayerNetworkOperations.handleClientActionRequest(root, this);
-                PlayerNetworkOperations.broadcastToOthers(playerId, Action.ACTIVE_PLAYER_CONNECTED);
+                if(!isBroadCasted && playerId != -1) {
+                    PlayerNetworkOperations.broadcastToOthers(playerId, Action.ACTIVE_PLAYER_CONNECTED);
+                    isBroadCasted = true;
+                }
             }
         } catch (EOFException | SocketException e) {
             handleDisconnect();

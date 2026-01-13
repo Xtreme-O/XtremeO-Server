@@ -10,7 +10,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.sql.SQLOutput;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -26,14 +25,11 @@ import org.example.xtremo.model.entity.Player;
 import org.example.xtremo.model.enums.GameResult;
 import org.example.xtremo.model.enums.GameType;
 import org.example.xtremo.network.protocol.Action;
-import static org.example.xtremo.network.protocol.Action.IN_GAME_MESSAGE;
-import static org.example.xtremo.network.protocol.Action.SESSION_MESSAGE;
 import org.example.xtremo.network.protocol.ActionTypeMapper;
 import org.example.xtremo.network.protocol.ProtocolMessageEnvelope;
 import org.example.xtremo.network.protocol.RequestHeader;
 import org.example.xtremo.network.protocol.models.*;
 
-import static org.example.xtremo.network.protocol.models.GameState.WIN;
 
 import org.example.xtremo.service.ScoreService;
 import org.example.xtremo.session.SessionPlayer;
@@ -71,7 +67,26 @@ public final class PlayerNetworkOperations {
         out.flush();
     }
 
-    public static void handleClientActionRequest(
+
+    public static void handleClientActionRequest(JsonObject root,
+                                           PlayerConnectionHandler client) throws IOException {
+        try {
+            handleClientAction(root, client);
+        }catch (Exception e) {
+            sendErrorResponse(e.getMessage(), client);
+        }
+    }
+
+    private static void sendErrorResponse(String error, PlayerConnectionHandler client)
+            throws IOException {
+        RequestHeader header = new RequestHeader("JSON", Action.ERROR.name());
+        ProtocolMessageEnvelope<ErrorBody> response = new ProtocolMessageEnvelope<>(header,
+                new ErrorBody(error));
+        sendResponse(response, client.getDos());
+    }
+
+
+    public static void handleClientAction(
             JsonObject root,
             PlayerConnectionHandler client) throws Exception {
 
@@ -94,7 +109,7 @@ public final class PlayerNetworkOperations {
                 client.setPlayerId(player.id());
 
                 ProtocolMessageEnvelope<PlayerDTO> response = new ProtocolMessageEnvelope<>(
-                        new RequestHeader("JSON", "RESPONSE"),
+                        new RequestHeader("JSON", Action.LOGIN.name()),
                         player);
 
                 sendResponse(response, client.getDos());
@@ -109,7 +124,7 @@ public final class PlayerNetworkOperations {
                 PlayerDTO player = AuthenticationHandler.handleRegister(authService, req);
 
                 ProtocolMessageEnvelope<PlayerDTO> response = new ProtocolMessageEnvelope<>(
-                        new RequestHeader("JSON", "RESPONSE"),
+                        new RequestHeader("JSON",  Action.REGISTER.name()),
                         player);
 
                 sendResponse(response, client.getDos());
