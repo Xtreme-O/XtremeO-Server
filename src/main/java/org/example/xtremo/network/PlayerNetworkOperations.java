@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Optional;
 import org.example.xtremo.custom_exceptions.CustomException;
 import org.example.xtremo.handlers.AuthenticationHandler;
-import org.example.xtremo.mapper.PlayerMapper;
 import org.example.xtremo.model.dto.PlayerDTO;
 import org.example.xtremo.model.dto.PlayerScoreDTO;
 import org.example.xtremo.model.entity.Game;
@@ -126,7 +125,7 @@ public final class PlayerNetworkOperations {
                 PlayerDTO player = AuthenticationHandler.handleRegister(authService, req);
 
                 PlayerScoreDTO playerScoreDTO = ScoreService.getInstance().getPlayerScore(player.id());
-
+                client.setPlayerId(player.id());
 
                 ProtocolMessageEnvelope<PlayerScoreDTO> response = new ProtocolMessageEnvelope<>(
                         new RequestHeader("JSON",  Action.REGISTER.name()),
