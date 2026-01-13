@@ -14,8 +14,8 @@ public class Server implements Runnable {
     private ServerSocket serverSocket;
     private volatile boolean running = true;
 
-    public static final ConcurrentHashMap<Integer, PlayerConnectionHandler> activePlayers =
-            new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<Integer, PlayerConnectionHandler> activePlayers
+            = new ConcurrentHashMap<>();
 
     public static final SessionManager sessionManager = SessionManager.getManager();
     public static final LoggerManager logger = LoggerManager.getInstance();
@@ -25,8 +25,9 @@ public class Server implements Runnable {
     @Override
     public void run() {
         try {
-            serverSocket = new ServerSocket(6666);
-            logger.info("Server started on port 6666");
+            int ServerPort = ServerConfig.getServerPortNumber();
+            serverSocket = new ServerSocket(ServerPort);
+            logger.info("Server started on port: " + ServerPort);
 
             while (running) {
                 Socket socket = serverSocket.accept();
@@ -36,7 +37,7 @@ public class Server implements Runnable {
             }
         } catch (IOException e) {
             if (running) {
-                logger.error("Server error: "+ e.getMessage());
+                logger.error("Server error: " + e.getMessage());
             }
         }
     }
