@@ -76,7 +76,7 @@ public class AuthService {
                 username,
                 passwordHash,
                 avatarUrl,
-                PlayerStatus.OFFLINE
+                PlayerStatus.ONLINE
         );
 
         Player savedPlayer = playerDao.save(player);

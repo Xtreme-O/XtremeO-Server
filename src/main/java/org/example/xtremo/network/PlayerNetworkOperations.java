@@ -106,11 +106,13 @@ public final class PlayerNetworkOperations {
 
                 PlayerDTO player = AuthenticationHandler.handleLogin(authService, req);
 
+                PlayerScoreDTO playerScoreDTO = ScoreService.getInstance().getPlayerScore(player.id());
+
                 client.setPlayerId(player.id());
 
-                ProtocolMessageEnvelope<PlayerDTO> response = new ProtocolMessageEnvelope<>(
+                ProtocolMessageEnvelope<PlayerScoreDTO> response = new ProtocolMessageEnvelope<>(
                         new RequestHeader("JSON", Action.LOGIN.name()),
-                        player);
+                        playerScoreDTO);
 
                 sendResponse(response, client.getDos());
                 Server.logger.info("LOGIN success: " + player.id());
@@ -123,9 +125,12 @@ public final class PlayerNetworkOperations {
 
                 PlayerDTO player = AuthenticationHandler.handleRegister(authService, req);
 
-                ProtocolMessageEnvelope<PlayerDTO> response = new ProtocolMessageEnvelope<>(
+                PlayerScoreDTO playerScoreDTO = ScoreService.getInstance().getPlayerScore(player.id());
+
+
+                ProtocolMessageEnvelope<PlayerScoreDTO> response = new ProtocolMessageEnvelope<>(
                         new RequestHeader("JSON",  Action.REGISTER.name()),
-                        player);
+                        playerScoreDTO);
 
                 sendResponse(response, client.getDos());
             }
@@ -319,15 +324,13 @@ public final class PlayerNetworkOperations {
     }
 
     public static void broadcastToOthers(int playerId , Action action) throws Exception {
-        Player player = PlayerService.getPlayerService()
-                .findById(playerId)
-                .orElseThrow();
+        PlayerScoreDTO player = ScoreService.getInstance().getPlayerScore(playerId);
 
-        ProtocolMessageEnvelope<PlayerDTO> response =
+
+        ProtocolMessageEnvelope<PlayerScoreDTO> response =
                 new ProtocolMessageEnvelope<>(
                         new RequestHeader("JSON", action.name()),
-                        PlayerMapper.toDto(player)
-                );
+                        player);
 
         Server.activePlayers.forEachValue(1, client -> {
             if (client.getPlayerId() != playerId) {
