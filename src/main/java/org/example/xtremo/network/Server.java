@@ -56,7 +56,7 @@ public class Server implements Runnable {
     }
 
     public static void stop() {
-        lock.tryLock();
+        lock.lock();
     }
 
     public static void start() {
