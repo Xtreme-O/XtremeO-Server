@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.example.xtremo.logging.LoggerManager;
 import org.example.xtremo.model.dto.GameDTO;
+import org.example.xtremo.network.Server;
 
 
 public class UIInitializer {
@@ -59,7 +60,7 @@ public class UIInitializer {
 
             int online = statsService.getCount(PlayerStatus.ONLINE);
             int offline = statsService.getCount(PlayerStatus.OFFLINE);
-            int inGame = statsService.getCount(PlayerStatus.INGAME);
+            int inGame = Server.sessionManager.getSessionsCount()*2;
 
             System.out.println(online);
 
