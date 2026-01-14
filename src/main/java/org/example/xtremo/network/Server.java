@@ -60,7 +60,9 @@ public class Server implements Runnable {
     }
 
     public static void start() {
-        lock.unlock();
+        if (lock.isHeldByCurrentThread()) {
+            lock.unlock();
+        }
     }
 
     public static void restart() {
