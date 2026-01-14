@@ -358,7 +358,7 @@ XtremO-Server/
 - **Abdelrahman Waheed**
 - **Abdullah Elsobky**
 - **Wahid Qandil**
-- **Mona**
+- **Mona Hamed**
 - **Ali Abdulkareem**
 
 ## Troubleshooting
