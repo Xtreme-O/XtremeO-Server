@@ -7,65 +7,109 @@ package org.example.xtremo.controller;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
-import javafx.event.ActionEvent;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-
+import javafx.scene.chart.BarChart;
 import javafx.scene.control.Button;
-import org.example.xtremo.dao.GameDao;
-import org.example.xtremo.dao.GameDaoImpl;
-import org.example.xtremo.dao.GameMoveDao;
-import org.example.xtremo.dao.GameMoveDaoImpl;
-import org.example.xtremo.dao.PlayerDao;
-import org.example.xtremo.dao.PlayerDaoImpl;
-import org.example.xtremo.dao.PlayerScoreDao;
-import org.example.xtremo.dao.PlayerScoreDaoImpl;
-import org.example.xtremo.database.DBConnection;
-
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TableView;
+import javafx.scene.input.ScrollEvent;
+import javafx.scene.text.Text;
+import org.controlsfx.control.ToggleSwitch;
+import javafx.scene.layout.VBox;
+import org.example.xtremo.controller.sub.ServerStatsMonitor;
+import org.example.xtremo.controller.sub.ServiceControlsController;
+import org.example.xtremo.controller.sub.TogglesController;
+import org.example.xtremo.logging.LoggerManager;
+import org.example.xtremo.model.dto.GameDTO;
+import org.example.xtremo.service.statistics.StateService;
+import org.example.xtremo.ui.ActionHandler;
+import org.example.xtremo.ui.UIInitializer;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 /**
- * FXML Controller class
  *
  * @author Abdelrahman
  */
 public class PrimaryController implements Initializable {
 
+    @FXML
+    private Button stopBtn;
+    @FXML
+    private FontIcon stopBtnIcon;
+    @FXML
+    private Button restartBtn;
+    @FXML
+    private FontIcon restartBtnIcon;
+    @FXML
+    private ToggleSwitch matchmakingToggle;
+    @FXML
+    private ToggleSwitch chatToggle;
+    @FXML
+    private VBox logContainer;
+    @FXML
+    private ScrollPane terminalScroll;
+    @FXML
+    private BarChart<String, Number> playerStatusChart;
+    @FXML
+    private TableView<GameDTO> matchesTable;
 
     @FXML
-    private Button primaryButton;
-    /**
-     * Initializes the controller class.
-     */
+    private Text activePlayersText;
+    @FXML
+    private Text liveMatchesText;
+
+    @FXML
+    private ScrollPane mainScrollPane;
+
+    private ActionHandler actionHandler;
+    private ServiceControlsController serviceControls;
+    private TogglesController togglesController;
+    private UIInitializer uIInitializer;
+
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
-    }    
-    
-    @FXML
-    private void switchToSecondary(ActionEvent event) throws SQLException {
 
-        PlayerDao playerDao = new PlayerDaoImpl(DBConnection.getConnection());
-        GameDao gameDao = new GameDaoImpl(DBConnection.getConnection());
-        GameMoveDao gameMoveDao = new GameMoveDaoImpl(DBConnection.getConnection());
-        PlayerScoreDao scoreDao = new PlayerScoreDaoImpl(DBConnection.getConnection());
-        
-         System.out.println("=== PLAYERS ===");
-        playerDao.findAll()
-                .forEach(p -> System.out.println(p.getUsername()));
+        Platform.runLater(() -> {
+            actionHandler = new ActionHandler();
+            try {
+                uIInitializer = new UIInitializer(stopBtn, playerStatusChart, matchesTable);
+            } catch (SQLException ex) {
+                System.getLogger(PrimaryController.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+            }
+            StateService statsService = null;
+            try {
+                statsService = new StateService();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            ServerStatsMonitor monitor = new ServerStatsMonitor(statsService);
+            monitor.startMonitoring(activePlayersText, liveMatchesText);
+            uIInitializer.initialize();
+            LoggerManager.getInstance().init(logContainer, terminalScroll);
+            serviceControls = new ServiceControlsController(stopBtn, stopBtnIcon, restartBtn, restartBtnIcon, actionHandler);
+            togglesController = new TogglesController(matchmakingToggle, chatToggle, actionHandler);
+            serviceControls.initialize();
+            togglesController.initialize();
+            enhanceScrolling();
 
-        System.out.println("=== GAMES ===");
-        gameDao.findAll()
-                .forEach(g -> System.out.println(g.getGameType()));
-
-        System.out.println("=== MOVES ===");
-        gameMoveDao.findAll()
-                .forEach(m -> System.out.println(m.getMoveNumber()));
-
-        System.out.println("=== SCORES ===");
-        scoreDao.findAll()
-                .forEach(s -> System.out.println(s.getWins()));
-        
-
+        });
     }
 
+    private void enhanceScrolling() {
+        mainScrollPane.addEventFilter(ScrollEvent.SCROLL, event -> {
+            double contentHeight = mainScrollPane.getContent().getBoundsInLocal().getHeight();
+            double viewportHeight = mainScrollPane.getViewportBounds().getHeight();
+
+            double scrollAmount = event.getDeltaY() / (contentHeight - viewportHeight);
+
+            mainScrollPane.setVvalue(
+                    mainScrollPane.getVvalue() - scrollAmount
+            );
+
+            event.consume();
+        });
+    }
 }

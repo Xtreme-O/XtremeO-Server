@@ -1,6 +1,7 @@
 package org.example.xtremo.dao;
 
 import org.example.xtremo.model.entity.Player;
+import org.example.xtremo.model.enums.PlayerStatus;
 
 import java.util.List;
 import java.util.Optional;

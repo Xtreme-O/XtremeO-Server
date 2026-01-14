@@ -1,6 +1,8 @@
 package org.example.xtremo.model.entity;
 
 import java.time.LocalDateTime;
+import org.example.xtremo.model.dto.PlayerDTO;
+import org.example.xtremo.model.enums.PlayerStatus;
 
 public class Player {
 
@@ -8,21 +10,27 @@ public class Player {
     private String username;
     private String passwordHash;
     private String avatarUrl;
-    private String status;
+    private PlayerStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime lastLogin;
+    
+    
+    
+    public PlayerDTO toPlayerDto(){
+        return new PlayerDTO(id, username, avatarUrl, status, createdAt, lastLogin);
+    }
 
     public Player() {
     }
 
-    public Player(String username, String passwordHash, String avatarUrl, String status) {
+    public Player(String username, String passwordHash, String avatarUrl, PlayerStatus status) {
         this.username = username;
         this.passwordHash = passwordHash;
         this.avatarUrl = avatarUrl;
         this.status = status;
     }
     
-    public Player(int id, String username, String passwordHash, String avatarUrl, String status, LocalDateTime createdAt, LocalDateTime lastLogin) {
+    public Player(int id, String username, String passwordHash, String avatarUrl, PlayerStatus status, LocalDateTime createdAt, LocalDateTime lastLogin) {
         this.id = id;
         this.username = username;
         this.passwordHash = passwordHash;
@@ -65,11 +73,11 @@ public class Player {
         this.avatarUrl = avatarUrl;
     }
 
-    public String getStatus() {
+    public PlayerStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(PlayerStatus status) {
         this.status = status;
     }
 

@@ -9,13 +9,25 @@ package org.example.xtremo.network.protocol;
  * @author Elsobky
  */
 public enum Action {
-    START,
-    WAITING,
-    TURN,
+    LOGIN,
+    REGISTER,
+    LOGOUT,
     MOVE,
     WIN,
     DRAW,
-    EXIT,
     ERROR,
-    UNKNOWN
+    UNKNOWN,
+    INVITE,
+    INVITE_CONFIRMED,
+    INVITE_DECLINED,
+    PARTNER_DISCONNECTED,
+    SESSION_MESSAGE,
+    SESSION_ENDED,
+    GET_ACTIVE_USERS,
+    IN_GAME_MESSAGE,
+    GLOBAL_MESSAGE,
+    ACTIVE_PLAYER_DISCONNECTED,
+    ACTIVE_PLAYER_CONNECTED,
+    LOBBY,
+    INVITE_ALL,
 }

@@ -1,0 +1,119 @@
+/**
+ * XtremO Server Dashboard - Optimized Styles
+ * @author Abdelrahman
+ */
+
+/* ========== ICONS ========== */
+.logo-icon-fa { -fx-icon-color: #1a1a1a; }
+.icon-fa-large { -fx-icon-color: #ffffff; }
+.chart-badge-icon { -fx-icon-color: #ff6b35; }
+.terminal-icon-fa { -fx-icon-color: #94a3b8; }
+
+/* ========== HEADER ========== */
+.header {
+    -fx-background-color: #252525;
+    -fx-border-color: transparent transparent rgba(255, 255, 255, 0.08) transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.logo-icon {
+    -fx-background-color: #f4af25;
+    -fx-background-radius: 10;
+    -fx-pref-width: 36;
+    -fx-pref-height: 36;
+    -fx-cursor: hand;
+}
+.logo-icon:hover { -fx-background-color: #ffbe3d; }
+
+.brand-title { -fx-font-size: 18px; -fx-font-weight: 700; -fx-fill: #ffffff; }
+.status-indicator { -fx-fill: #22c55e; }
+.status-text { -fx-font-size: 13px; -fx-font-weight: 500; -fx-fill: #94a3b8; }
+
+/* ========== MAIN CONTENT ========== */
+.content-scroll, .content-scroll > .viewport, .main-content { -fx-background-color: transparent; }
+.welcome-title { -fx-font-size: 28px; -fx-font-weight: 700; -fx-fill: #ffffff; }
+.welcome-subtitle { -fx-font-size: 14px; -fx-fill: #94a3b8; }
+
+/* ========== STAT CARDS ========== */
+.stat-card { -fx-pref-height: 160; }
+.stat-icon { -fx-background-radius: 12; -fx-pref-width: 48; -fx-pref-height: 48; }
+.stat-icon-primary { -fx-background-color: rgba(244, 175, 37, 0.25); }
+.stat-icon-purple { -fx-background-color: rgba(168, 85, 247, 0.25); }
+
+.stat-badge { -fx-font-size: 12px; -fx-font-weight: 700; -fx-padding: 6 14; -fx-background-radius: 16; }
+.stat-badge-success { -fx-background-color: rgba(34, 197, 94, 0.25); -fx-text-fill: #4ade80; }
+.stat-badge-warning { -fx-background-color: rgba(244, 175, 37, 0.25); -fx-text-fill: #ffc247; }
+
+.stat-label { -fx-font-size: 13px; -fx-font-weight: 500; -fx-fill: #94a3b8; }
+.stat-value { -fx-font-size: 36px; -fx-font-weight: 700; -fx-fill: #ffffff; }
+.stat-secondary { -fx-font-size: 13px; -fx-fill: #64748b; }
+.pulse-dot { -fx-fill: #22c55e; }
+.live-text { -fx-font-size: 11px; -fx-fill: #94a3b8; }
+
+/* ========== CHART ========== */
+.chart-container { -fx-min-height: 300; }
+.chart-header { -fx-border-color: transparent transparent rgba(255, 255, 255, 0.1) transparent; -fx-border-width: 0 0 1 0; }
+.chart-title { -fx-font-size: 16px; -fx-font-weight: 700; -fx-fill: #ffffff; }
+.chart-subtitle { -fx-font-size: 13px; -fx-fill: #94a3b8; }
+.chart-badge { -fx-background-color: rgba(244, 175, 37, 0.2); -fx-background-radius: 12; -fx-padding: 8 16; }
+.chart-badge-text { -fx-font-size: 13px; -fx-font-weight: 700; -fx-fill: #ffc247; }
+
+.player-bar-chart, .player-bar-chart .chart-plot-background { -fx-background-color: transparent; }
+.player-bar-chart .chart-bar { -fx-background-color: #f4af25; -fx-background-radius: 4 4 0 0; }
+.player-bar-chart .chart-bar:hover { -fx-background-color: #ffbe3d; }
+
+.chart-axis { -fx-tick-label-fill: #94a3b8; -fx-tick-label-font-size: 11px; }
+.chart-axis .axis-label { -fx-text-fill: #cbd5e1; -fx-font-size: 12px; -fx-font-weight: 600; }
+.chart-axis .axis-tick-mark, .chart-axis .axis-line { -fx-stroke: rgba(255, 255, 255, 0.1); }
+.chart-axis .axis-minor-tick-mark { -fx-stroke: rgba(255, 255, 255, 0.05); }
+.player-bar-chart .chart-vertical-grid-lines { -fx-stroke: rgba(255, 255, 255, 0.05); }
+.player-bar-chart .chart-horizontal-grid-lines { -fx-stroke: rgba(255, 255, 255, 0.1); }
+.player-bar-chart .default-color0.chart-bar { -fx-background-color: #f4af25; }
+.player-bar-chart .default-color1.chart-bar { -fx-background-color: #3b82f6; }
+.player-bar-chart .default-color2.chart-bar { -fx-background-color: #ef4444; }
+
+/* ========== TERMINAL ========== */
+.terminal-container { -fx-background-color: #1e1e1e; -fx-min-height: 280; }
+.terminal-header {
+    -fx-background-color: #2a2a2a;
+    -fx-background-radius: 16 16 0 0;
+    -fx-border-color: transparent transparent rgba(255, 255, 255, 0.1) transparent;
+    -fx-border-width: 0 0 1 0;
+}
+.terminal-title { -fx-font-size: 13px; -fx-font-weight: 600; -fx-fill: #94a3b8; -fx-font-family: "Consolas", monospace; }
+.terminal-dot { -fx-stroke-width: 0; }
+.terminal-dot-red { -fx-fill: #ef4444; }
+.terminal-dot-yellow { -fx-fill: #f59e0b; }
+.terminal-dot-green { -fx-fill: #22c55e; }
+.terminal-scroll, .terminal-scroll > .viewport { -fx-background-color: transparent; }
+.terminal-logs { -fx-font-family: "Consolas", monospace; -fx-font-size: 13px; }
+
+.log-timestamp { -fx-text-fill: #cbd5e1; -fx-font-weight: 600; }
+.log-info { -fx-text-fill: #3b82f6; }
+.log-warn { -fx-text-fill: #fbbf24; -fx-font-weight: 600; }
+.log-success { -fx-text-fill: #4ade80; -fx-font-weight: 600; }
+.log-error { -fx-text-fill: #f87171; -fx-font-weight: 600; }
+
+/* ========== CONTROL PANEL ========== */
+.control-panel { -fx-min-height: 300; }
+.panel-title { -fx-font-size: 16px; -fx-font-weight: 700; -fx-fill: #ffffff; }
+.panel-subtitle { -fx-font-size: 13px; -fx-fill: #94a3b8; }
+.toggle-list { -fx-spacing: 28; }
+.toggle-row { -fx-padding: 8; -fx-background-radius: 12; }
+.toggle-row:hover { -fx-background-color: rgba(244, 175, 37, 0.08); }
+.toggle-title { -fx-font-size: 15px; -fx-font-weight: 600; -fx-fill: #ffffff; }
+.toggle-subtitle { -fx-font-size: 13px; -fx-fill: #94a3b8; }
+
+/* ========== TABLE ========== */
+.table-container { -fx-min-height: 300; }
+.table-header { -fx-border-color: transparent transparent rgba(255, 255, 255, 0.1) transparent; -fx-border-width: 0 0 1 0; }
+.table-title { -fx-font-size: 16px; -fx-font-weight: 700; -fx-fill: #ffffff; }
+.table-subtitle { -fx-font-size: 13px; -fx-fill: #94a3b8; }
+
+.matches-table { -fx-background-color: transparent; -fx-background-radius: 0 0 24 24; }
+.matches-table .column-header-background { -fx-background-color: rgba(30, 30, 30, 0.8); }
+.matches-table .column-header { -fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-weight: 600; -fx-font-size: 13px; }
+.matches-table .table-cell { -fx-text-fill: #cbd5e1; -fx-background-color: transparent; -fx-padding: 16 12; }
+.matches-table .table-row-cell { -fx-background-color: transparent; -fx-border-color: transparent transparent rgba(255, 255, 255, 0.05) transparent; -fx-border-width: 0 0 1 0; }
+.matches-table .table-row-cell:hover { -fx-background-color: rgba(244, 175, 37, 0.12); }
+.matches-table .table-row-cell:selected { -fx-background-color: rgba(244, 175, 37, 0.25); }

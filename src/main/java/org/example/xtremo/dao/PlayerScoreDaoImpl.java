@@ -1,6 +1,7 @@
 package org.example.xtremo.dao;
 
 import org.example.xtremo.model.entity.PlayerScore;
+import org.example.xtremo.model.enums.GameType;
 
 import java.sql.Statement;
 import java.sql.PreparedStatement;
@@ -31,15 +32,32 @@ public class PlayerScoreDaoImpl implements PlayerScoreDao {
             statement.setInt(6, score.getLongestStreak());
             int rowsAffected = statement.executeUpdate();
             if (rowsAffected > 0) {
-                ResultSet resultSet = statement.getGeneratedKeys();
-                if (resultSet.next()) {
-                    return mapToUserScore(resultSet);
-                }
+               var resultSet = statement.getGeneratedKeys();
+               if(resultSet.next()) {
+                   return findById(resultSet.getInt(1)).orElseThrow();
+               }
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error saving user score", e);
         }
         return null;
+    }
+    
+    
+    @Override
+    public Optional<PlayerScore> findById(int id) {
+        String query = "SELECT * FROM user_scores WHERE score_id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, id);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return Optional.of(mapToUserScore(resultSet));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error finding user score with id : " + id, e);
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -54,6 +72,26 @@ public class PlayerScoreDaoImpl implements PlayerScoreDao {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error finding user score with user id : " + userId, e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<PlayerScore> findByUserIdAndGameType(int userId , GameType gameType) {
+        String query = "SELECT * FROM user_scores WHERE user_id = ? AND game_type = ? ";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, userId);
+            statement.setString(2, gameType.name());
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return Optional.of(mapToUserScore(resultSet));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                    "Error finding user score for userId=" + userId + " and gameType=" + gameType,
+                    e
+            );
         }
         return Optional.empty();
     }
