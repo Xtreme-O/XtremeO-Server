@@ -82,8 +82,6 @@ public class UIInitializer {
         );
 
         chartManager.setupChart(FXCollections.observableArrayList(chartData));
-
-        LoggerManager.getInstance().info("Chart updated");
     }
 
     public void stopChartMonitoring() {
