@@ -177,9 +177,11 @@ public final class PlayerNetworkOperations {
                 Session playerOneSession = Server.sessionManager.getByPlayer(senderId);
                 Session playerTwoSession = Server.sessionManager.getByPlayer(receiverId);
 
-                if(playerTwoSession != null || playerOneSession != null) {
-                    throw new CustomException.InviteError("This player is already in a session");
+                if ((playerOneSession != null && playerOneSession.isActive()) ||
+                        (playerTwoSession != null && playerTwoSession.isActive())) {
+                    throw new CustomException.InviteError("This player is already in a game");
                 }
+
                 if (sender == null || receiver == null) {
                     throw new CustomException.InviteError("One of the players is offline");
                 }
