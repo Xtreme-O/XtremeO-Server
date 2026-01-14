@@ -25,6 +25,7 @@ import org.example.xtremo.model.entity.Player;
 import org.example.xtremo.model.enums.GameResult;
 import org.example.xtremo.model.enums.GameType;
 import org.example.xtremo.network.protocol.Action;
+import static org.example.xtremo.network.protocol.Action.GLOBAL_MESSAGE;
 import org.example.xtremo.network.protocol.ActionTypeMapper;
 import org.example.xtremo.network.protocol.ProtocolMessageEnvelope;
 import org.example.xtremo.network.protocol.RequestHeader;
@@ -126,7 +127,7 @@ public final class PlayerNetworkOperations {
                 PlayerDTO player = AuthenticationHandler.handleRegister(authService, req);
 
                 PlayerScoreDTO playerScoreDTO = ScoreService.getInstance().getPlayerScore(player.id());
-
+                client.setPlayerId(player.id());
 
                 ProtocolMessageEnvelope<PlayerScoreDTO> response = new ProtocolMessageEnvelope<>(
                         new RequestHeader("JSON",  Action.REGISTER.name()),
@@ -168,7 +169,7 @@ public final class PlayerNetworkOperations {
 
                 InviteConfirmedBody body = req.getBody();
                 int senderId = body.getSenderId();
-                int receiverId = body.getRecieverId();
+                int receiverId = body.getReceiverId();
 
                 PlayerConnectionHandler sender = Server.activePlayers.get(senderId);
                 PlayerConnectionHandler receiver = Server.activePlayers.get(receiverId);
@@ -190,7 +191,7 @@ public final class PlayerNetworkOperations {
                 RequestHeader header = new RequestHeader("JSON", Action.INVITE_CONFIRMED.name());
                 InviteConfirmedResponseBody responseBody = new InviteConfirmedResponseBody();
                 Optional<Player> senderPlayer = playerService.findById(senderId);
-                Optional<Player> receiverPlayer = playerService.findById(senderId);
+                Optional<Player> receiverPlayer = playerService.findById(receiverId);
 
                 if (senderPlayer.isPresent()) {
                     Player p = senderPlayer.get();
@@ -198,13 +199,18 @@ public final class PlayerNetworkOperations {
                 }
                 if (receiverPlayer.isPresent()) {
                     Player p = receiverPlayer.get();
-                    responseBody.setPlayer1(new MovePlayer(p.getUsername(), Symbols.O.name()));
+                    responseBody.setPlayer2(new MovePlayer(p.getUsername(), Symbols.O.name()));
                 }
-                
+
                 ProtocolMessageEnvelope<InviteConfirmedResponseBody> res = new ProtocolMessageEnvelope<>(header,responseBody);
                 session.forward(res, senderId);
                 session.forward(res, receiverId);
                 
+            }
+            case SESSION_ENDED -> {
+                int playerId = client.getPlayerId();
+                Session session = Server.sessionManager.getByPlayer(playerId);
+                session.closeSession();
             }
 
             case SESSION_MESSAGE -> {
@@ -223,9 +229,12 @@ public final class PlayerNetworkOperations {
                         Game game = new Game();
                         game.setGameType(GameType.TIC_TAC_TOE);
                         game.setPlayer1Id(client.getPlayerId());
+                        game.setWinnerId(client.getPlayerId());
                         var otherPlayerId = session.getOtherPlayer(playerId).getPlayerId();
                         game.setPlayer2Id(otherPlayerId);
                         game.setGameResult(GameResult.WIN);
+                        game.setStartedAt(session.getStartedAt());
+                        game.setEndedAt(LocalDateTime.now());
                         gameService.save(game);
                         score.updateGameResult(GameResult.WIN, GameType.TIC_TAC_TOE, client.getPlayerId());
                         score.updateGameResult(GameResult.LOSS, GameType.TIC_TAC_TOE, otherPlayerId);
@@ -237,6 +246,8 @@ public final class PlayerNetworkOperations {
                         var otherPlayerId = session.getOtherPlayer(playerId).getPlayerId();
                         game.setPlayer2Id(otherPlayerId);
                         game.setGameResult(GameResult.DRAW);
+                        game.setStartedAt(session.getStartedAt());
+                        game.setEndedAt(LocalDateTime.now());
                         gameService.save(game);
                         score.updateGameResult(GameResult.DRAW, GameType.TIC_TAC_TOE, client.getPlayerId());
                         score.updateGameResult(GameResult.DRAW, GameType.TIC_TAC_TOE, otherPlayerId);
@@ -245,6 +256,7 @@ public final class PlayerNetworkOperations {
                     }
                 }
 
+                System.out.println("Forwarding to " + playerId + " " + req);
                 session.forward(req, playerId);
             }
             case GET_ACTIVE_USERS -> {
@@ -317,10 +329,38 @@ public final class PlayerNetworkOperations {
                     }
                 });
             }
+            case INVITE_ALL -> {
+                broadcastInviteToOthers(client.getPlayerId(), Action.INVITE);
+            }
 
             default ->
                 throw new AssertionError("Unhandled action: " + action);
         }
+    }
+
+    public static void broadcastInviteToOthers(int playerId , Action action) throws Exception {
+        var playerService = PlayerService.getPlayerService();
+
+        ProtocolMessageEnvelope<InviteBody> response =   new ProtocolMessageEnvelope<>(
+                new RequestHeader("JSON", action.name()), new InviteBody());
+
+        var sender = playerService.findById(playerId)
+                .orElseThrow(() -> new IllegalStateException("Player not found: " + playerId));
+
+        Server.activePlayers.forEachValue(1, client -> {
+            if (client.getPlayerId() != playerId) {
+                try {
+                    var receiver = playerService.findById(client.getPlayerId())
+                            .orElseThrow(() -> new IllegalStateException("Player not found: " + client.getPlayerId()));
+                    response.setBody(new InviteBody(PlayerMapper.toDto(sender), PlayerMapper.toDto(receiver)));
+
+                    sendResponse(response, client.getDos());
+
+                } catch (IOException e) {
+                    Server.logger.error("Can't reach client {}" + playerId);
+                }
+            }
+        });
     }
 
     public static void broadcastToOthers(int playerId , Action action) throws Exception {

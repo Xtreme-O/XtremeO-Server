@@ -10,14 +10,14 @@ package org.example.xtremo.network.protocol.models;
  */
 public class InviteConfirmedBody {
     int senderId;
-    int recieverId; 
+    int receiverId;
 
     public int getSenderId() {
         return senderId;
     }
 
-    public int getRecieverId() {
-        return recieverId;
+    public int getReceiverId() {
+        return receiverId;
     }
 
     public InviteConfirmedBody() {
@@ -25,6 +25,6 @@ public class InviteConfirmedBody {
 
     public InviteConfirmedBody(int senderId, int recieverId) {
         this.senderId = senderId;
-        this.recieverId = recieverId;
+        this.receiverId = recieverId;
     }
 }

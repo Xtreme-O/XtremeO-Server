@@ -6,6 +6,7 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
+import org.example.xtremo.network.Server;
 import org.example.xtremo.service.statistics.StateService;
 import org.example.xtremo.model.enums.PlayerStatus;
 
@@ -20,7 +21,7 @@ public class ServerStatsMonitor {
     public void startMonitoring(Text activePlayersText, Text liveMatchesText) {
         timeline = new Timeline(
                 new KeyFrame(Duration.seconds(1), e -> {
-                    int onlineCount = statsService.getCount(PlayerStatus.ONLINE);
+                    int onlineCount = Server.activePlayers.size();
                     int matchesCount = statsService.getActiveMatchesCount();
 
                     Platform.runLater(() -> {

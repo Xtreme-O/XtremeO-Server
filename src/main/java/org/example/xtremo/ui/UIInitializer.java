@@ -1,38 +1,37 @@
 package org.example.xtremo.ui;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
-import javafx.scene.text.Text;
-import org.example.xtremo.model.entity.Game;
-import org.example.xtremo.model.enums.PlayerStatus;
-import org.example.xtremo.service.GameService;
-import org.example.xtremo.service.statistics.StateService;
-import org.example.xtremo.ui.table.TableManager;
-import java.time.LocalDateTime;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableView;
+import javafx.util.Duration;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.example.xtremo.logging.LoggerManager;
 import org.example.xtremo.model.dto.GameDTO;
-import org.example.xtremo.model.enums.GameResult;
-import org.example.xtremo.model.enums.GameType;
+import org.example.xtremo.model.entity.Game;
+import org.example.xtremo.model.enums.PlayerStatus;
+import org.example.xtremo.network.Server;
+import org.example.xtremo.service.GameService;
+import org.example.xtremo.service.statistics.StateService;
+import org.example.xtremo.ui.table.TableManager;
 
-/**
- * All data fetching happens here (dummy data for now, will replace with
- * service/DAO later).
- */
 public class UIInitializer {
 
     private final AnimationManager animationManager;
     private final ChartManager chartManager;
     private final TableManager tableManager;
     private final StateService statsService;
+
+    private Timeline chartTimeline;
 
     public UIInitializer(
             Button stopBtn,
@@ -47,67 +46,74 @@ public class UIInitializer {
 
     public void initialize() {
 
-        statsService.listenToUpdates(this::loadChartDataAsync);
-
         Platform.runLater(() -> {
             animationManager.initializeAnimations();
-            LoggerManager.getInstance().error("Animations initialized");
+            LoggerManager.getInstance().info("Animations initialized");
         });
 
-        LoggerManager.getInstance().log("Data is being initialized");
+        LoggerManager.getInstance().log("Initializing UI data");
 
-        loadChartDataAsync();
+        startChartMonitoring();
         loadTableDataAsync();
-
     }
 
-    private void loadChartDataAsync() {
-        new Thread(() -> {
+    private void startChartMonitoring() {
 
-            int online = statsService.getCount(PlayerStatus.ONLINE);
-            int offline = statsService.getCount(PlayerStatus.OFFLINE);
-            int inGame = statsService.getCount(PlayerStatus.INGAME);
+        updateChart();
 
-            System.out.println(online);
+        chartTimeline = new Timeline(
+                new KeyFrame(Duration.seconds(1), e -> updateChart())
+        );
 
-            LoggerManager.getInstance().success("Loading chart data...");
-
-            List<XYChart.Data<String, Number>> chartData = new ArrayList<>();
-            chartData.add(new XYChart.Data<>("Online", online));
-            chartData.add(new XYChart.Data<>("Offline", offline));
-            chartData.add(new XYChart.Data<>("In-Game", inGame));
-
-            Platform.runLater(() -> {
-
-                chartManager.setupChart(FXCollections.observableArrayList(chartData));
-                LoggerManager.getInstance().info("Chart data loaded successfully");
-            });
-        }).start();
+        chartTimeline.setCycleCount(Animation.INDEFINITE);
+        chartTimeline.play();
     }
 
-    // ONLY DUMMY DATA
+    private void updateChart() {
+
+        int online = Server.activePlayers.size();
+        int offline = statsService.getCount(PlayerStatus.OFFLINE);
+        int inGame = Server.sessionManager.getSessionsCount() * 2;
+
+        List<XYChart.Data<String, Number>> chartData = List.of(
+                new XYChart.Data<>("Online", online),
+                new XYChart.Data<>("Offline", offline),
+                new XYChart.Data<>("In-Game", inGame)
+        );
+
+        chartManager.setupChart(FXCollections.observableArrayList(chartData));
+    }
+
+    public void stopChartMonitoring() {
+        if (chartTimeline != null) {
+            chartTimeline.stop();
+        }
+    }
+
+
     private void loadTableDataAsync() {
-        try {
-            System.out.println("mona");
-            GameService gameService = GameService.getGameService();
-            List<GameDTO> tableData = new ArrayList<>(gameService.findAll().stream().map(Game::toGameDTO).toList());
-            Platform.runLater(() -> {
-                System.out.println("monnnnna");
+
+        new Thread(() -> {
+            try {
+                GameService gameService = GameService.getGameService();
+
+                List<GameDTO> tableData = new ArrayList<>(
+                        gameService.findAll()
+                                .stream()
+                                .map(Game::toGameDTO)
+                                .toList()
+                );
 
                 tableData.sort((a, b) -> Integer.compare(a.gameId(), b.gameId()));
-                tableManager.setData(tableData);
-                LoggerManager.getInstance().success("Table data loaded successfully");
-            });
 
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        new Thread(() -> {
-            LoggerManager.getInstance().warn("Loading table data...");
+                Platform.runLater(() -> {
+                    tableManager.setData(tableData);
+                    LoggerManager.getInstance().success("Table data loaded successfully");
+                });
 
-
-
-
+            } catch (SQLException e) {
+                LoggerManager.getInstance().error("Failed to load table data");
+            }
         }).start();
     }
 }
