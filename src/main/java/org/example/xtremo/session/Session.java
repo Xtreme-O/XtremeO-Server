@@ -5,6 +5,7 @@
 package org.example.xtremo.session;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 import org.example.xtremo.logging.LoggerManager;
@@ -34,6 +35,7 @@ public class Session {
     private final SessionPlayer player2;
     private final AtomicReference<SessionState> state = new AtomicReference<>(SessionState.CREATED);
     private final ReentrantLock sessionLock = new ReentrantLock();
+    private final LocalDateTime statedAt;
 
     private volatile Integer disconnectedPlayerId = null;
 
@@ -41,6 +43,7 @@ public class Session {
         this.id = id;
         this.player1 = player1;
         this.player2 = player2;
+        this.statedAt = LocalDateTime.now();
     }
 
     public String getId() {
@@ -50,6 +53,12 @@ public class Session {
     public SessionPlayer getPlayer1() {
         return player1;
     }
+
+
+    public LocalDateTime getStartedAt() {
+        return statedAt;
+    }
+
 
     public SessionPlayer getPlayer2() {
         return player2;
@@ -110,7 +119,7 @@ public class Session {
 
             if (remainingPlayer != null) {
                 notifyDisconnect(remainingPlayer);
-                closePlayerConnection(remainingPlayer);
+                //closePlayerConnection(remainingPlayer);
             }
 
             state.set(SessionState.CLOSED);
@@ -134,8 +143,8 @@ public class Session {
             notifySessionEnd(player1, "Session ended");
             notifySessionEnd(player2, "Session ended");
 
-            closePlayerConnection(player1);
-            closePlayerConnection(player2);
+//            closePlayerConnection(player1);
+//            closePlayerConnection(player2);
 
             state.set(SessionState.CLOSED);
             logger.info("Session " + id + " closed gracefully");

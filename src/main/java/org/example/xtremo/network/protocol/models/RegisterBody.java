@@ -11,7 +11,7 @@ package org.example.xtremo.network.protocol.models;
 public class RegisterBody {
     String username;
     String password;
-    String avtar_url;
+    String avatarUrl;
 
     public String getUsername() {
         return username;
@@ -29,12 +29,12 @@ public class RegisterBody {
         this.password = password;
     }
 
-    public String getAvtar_url() {
-        return avtar_url;
+    public String getAvatarUrl() {
+        return avatarUrl;
     }
 
-    public void setAvtar_url(String avtar_url) {
-        this.avtar_url = avtar_url;
+    public void setAvatarUrl(String avtar_url) {
+        this.avatarUrl = avatarUrl;
     }
     
     

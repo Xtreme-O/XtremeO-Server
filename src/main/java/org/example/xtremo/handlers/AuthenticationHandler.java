@@ -37,7 +37,7 @@ public class AuthenticationHandler {
     public static PlayerDTO handleRegister(AuthService authService, ProtocolMessageEnvelope<RegisterBody> request) throws Exception {
         try {
             RegisterBody body = request.getBody();
-            return authService.register(body.getUsername(), body.getPassword(), body.getAvtar_url());
+            return authService.register(body.getUsername(), body.getPassword(), body.getAvatarUrl());
         } catch (Exception e) {
             throw e;
         }
