@@ -214,7 +214,7 @@ public class Session {
     }
 
     public boolean isActive() {
-        return state.get() == SessionState.ACTIVE;
+        return state.get() != SessionState.CLOSED;
     }
 
     public boolean isClosed() {

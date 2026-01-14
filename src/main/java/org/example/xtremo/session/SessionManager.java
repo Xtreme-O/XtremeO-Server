@@ -61,6 +61,6 @@ public class SessionManager {
     }
     
     public int getSessionsCount(){
-        return sessions.size();
+        return sessions.values().stream().filter(Session::isActive).toList().size();
     }
 }
